@@ -15,7 +15,7 @@ public abstract class Assets {
     }
 
     public static void initialize() {
-        loadDirectory(new File("C:\\Users\\Aleksa\\Desktop\\CS202-PZ\\Chess2.0\\src\\main\\resources"));
+        loadDirectory(new File("C:\\Users\\Aleksa\\Desktop\\CS202\\Chess2.0\\src\\main\\resources"));
     }
 
     private static void loadDirectory(final File directory) {
