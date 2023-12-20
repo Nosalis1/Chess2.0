@@ -2,9 +2,6 @@ package com.chess2.pieces;
 
 import com.chess2.App;
 import com.chess2.Assets;
-import com.chess2.ChessMove;
-
-import java.util.List;
 
 /**
  * Represents a pawn chess piece.

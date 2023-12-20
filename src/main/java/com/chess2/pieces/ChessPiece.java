@@ -80,6 +80,14 @@ public abstract class ChessPiece extends ImageView {
      */
     public abstract boolean isValidMove(int startX, int startY, int targetX, int targetY, final ChessPiece[][] board);
 
+    public boolean isValidMove(final ChessPosition from, final ChessPosition to, final ChessPiece[][] board) {
+        return isValidMove(from.row(), from.col(), to.row(), to.col(), board);
+    }
+
+    public boolean isValidMove(final ChessMove move, final ChessPiece[][] board) {
+        return isValidMove(move.getFrom(), move.getTo(), board);
+    }
+
     /**
      * Gets the value of the chess piece.
      *

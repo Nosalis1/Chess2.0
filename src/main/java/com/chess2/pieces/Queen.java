@@ -71,15 +71,51 @@ public class Queen extends ChessPiece {
      * @return True if the path is clear, false if there are pieces blocking the path.
      */
     private boolean isPathClear(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
-        int stepX = Integer.compare(targetX, startX);
-        int stepY = Integer.compare(targetY, startY);
+        if (startX == targetX || startY == targetY) {
+            if (!isVerticalClear(startX, startY, targetX, targetY, board)) {
+                return false;
+            }
+            if (!isHorizontalClear(startX, startY, targetX, targetY, board)) {
+                return false;
+            }
+        } else {
+            return isDiagonalClear(startX, startY, targetX, targetY, board);
+        }
+        return true;
+    }
+    private boolean isVerticalClear(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
+        if (startY != targetY) {
+            int step = Integer.compare(targetY, startY);
+            for (int i = 1; i < Math.abs(startY - targetY); i++) {
+                int nextY = startY + i * step;
+                if (board[startX][nextY] != null) {
+                    return false; // There's a piece blocking the path
+                }
+            }
+        }
+        return true; // Path is clear
+    }
 
-        // For diagonal movement, check each square along the diagonal
+    private boolean isHorizontalClear(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
+        if (startX != targetX) {
+            int step = Integer.compare(targetX, startX);
+            for (int i = 1; i < Math.abs(startX - targetX); i++) {
+                int nextX = startX + i * step;
+                if (board[nextX][startY] != null) {
+                    return false; // There's a piece blocking the path
+                }
+            }
+        }
+        return true; // Path is clear
+    }
+
+    private boolean isDiagonalClear(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
         if (Math.abs(startX - targetX) == Math.abs(startY - targetY)) {
+            int stepX = Integer.compare(targetX, startX);
+            int stepY = Integer.compare(targetY, startY);
             for (int i = 1; i < Math.abs(targetX - startX); i++) {
                 int nextX = startX + i * stepX;
                 int nextY = startY + i * stepY;
-
                 if (board[nextX][nextY] != null) {
                     return false; // There's a piece blocking the path
                 }
@@ -87,6 +123,7 @@ public class Queen extends ChessPiece {
         }
         return true; // Path is clear
     }
+
 
     /**
      * Gets the value of the queen.

@@ -1,13 +1,16 @@
 package com.chess2;
 
+import com.chess2.ai.ABPruningAI;
+import com.chess2.ai.ChessAI;
 import com.chess2.pieces.*;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 
-// TODO : 1.Turn Management
-// TODO : 2.Check and Checkmate
-// TODO : 3.Move History
+import java.util.ArrayList;
+import java.util.List;
+
+// TODO : 1.Turn Management *
+// TODO : 2.Check and Checkmate *
+// TODO : 3.Move History *
 // TODO : 4.User Interface (UI) Improvements
 // TODO : 5.Event Handling
 // TODO : 6.En Passant and Castling
@@ -19,8 +22,34 @@ public class Game {
     public static final Game instance = new Game();
 
     public final GridPane root = new GridPane();
-
+    private ChessField[][] fields;
     public final ChessBoard board = new ChessBoard();
+    protected final ChessAI chessAI = new ABPruningAI();
+
+    private static class TurnManagement {
+        private static boolean whiteTurn = true;
+
+        public static boolean isWhiteTurn() {
+            return whiteTurn;
+        }
+
+        public static void next() {
+            whiteTurn = !whiteTurn;
+            if (!whiteTurn) {
+                Game.instance.chessAI.handleMove();
+            }
+        }
+
+        private static final List<ChessMove> moveHistory = new ArrayList<>();
+
+        public static List<ChessMove> getMoveHistory() {
+            return moveHistory;
+        }
+
+        public static void add(final int row, final int col, final int targetRow, final int targetCol) {
+            moveHistory.add(new ChessMove(row, col, targetRow, targetCol));
+        }
+    }
 
     public void reset() {
         this.board.reset();
@@ -34,19 +63,22 @@ public class Game {
     }
 
     private void createGrid() {
+        this.fields = new ChessField[App.CELL_COUNT][App.CELL_COUNT];
         for (int row = 0; row < App.CELL_COUNT; row++) {
             for (int col = 0; col < App.CELL_COUNT; col++) {
-                Rectangle square = new Rectangle(App.CELL_SIZE, App.CELL_SIZE);
-                square.setFill((row + col) % 2 == 0 ? Color.valueOf("#B58863") : Color.valueOf("#F0D9B5"));
-                this.root.add(square, col, row);
-
-                square.setOnMouseClicked(new UserInput(col, row));
+                ChessField field = new ChessField(row, col);
+                this.fields[row][col] = field;
+                this.root.add(field, col, row);
             }
         }
     }
 
+    public final ChessField[][] getFields() {
+        return this.fields;
+    }
+
     public void makeMove(final ChessPiece piece, final int targetRow, final int targetCol) {
-        if (piece == null) return;
+        if (piece == null || piece.isWhite() != TurnManagement.isWhiteTurn()) return;
 
         final int originalRow = piece.position.row(), originalCol = piece.position.col();
         if (piece.isValidMove(originalRow, originalCol, targetRow, targetCol, this.board.getPieces())) {
@@ -63,6 +95,9 @@ public class Game {
             this.board.setPiece(piece, targetRow, targetCol);
             this.root.add(piece, targetCol, targetRow);
             this.onPieceMoved(piece, originalRow, originalCol, targetRow, targetCol);
+
+            TurnManagement.add(originalRow, originalCol, targetRow, targetCol);
+            TurnManagement.next();
         } else {
             System.err.println("Move not valid!");
         }
@@ -83,6 +118,9 @@ public class Game {
     private void onPieceMoved(final ChessPiece piece, final int fromRow, final int fromCol, final int toRow, final int toCol) {
         // Do something with this (play sound...)
 
+        if (this.board.isCheck(true) || this.board.isCheck(false)) {
+            System.out.println("Check");
+        }
         if (isGameOver())
             System.out.println("Game ended!");
     }

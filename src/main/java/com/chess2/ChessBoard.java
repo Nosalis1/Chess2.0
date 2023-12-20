@@ -250,7 +250,7 @@ public class ChessBoard {
         return true;
     }
 
-    private void executeMove(final ChessMove move) {
+    public void executeMove(final ChessMove move) {
         ChessPiece piece = getPiece(move.getFrom().row(), move.getFrom().col());
         assert piece != null;
         setPiece(piece, move.getTo().row(), move.getTo().col());
