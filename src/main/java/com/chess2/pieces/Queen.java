@@ -74,14 +74,38 @@ public class Queen extends ChessPiece {
         int stepX = Integer.compare(targetX, startX);
         int stepY = Integer.compare(targetY, startY);
 
-        // For diagonal movement, check each square along the diagonal
+        // For horizontal movement
+        if (startX != targetX) {
+            for (int i = 1; i < Math.abs(targetX - startX); ++i) {
+                int nextX = startX + i * stepX;
+                int nextY = startY;
+
+                if (board[nextX][nextY] != null) {
+                    return false;
+                }
+            }
+        }
+
+        // For vertical movement
+        if (startY != targetY) {
+            for (int i = 1; i < Math.abs(targetY - startY); ++i) {
+                int nextX = startX;
+                int nextY = startY + i * stepY;
+
+                if (board[nextX][nextY] != null) {
+                    return false;
+                }
+            }
+        }
+
+        // For diagonal movement
         if (Math.abs(startX - targetX) == Math.abs(startY - targetY)) {
-            for (int i = 1; i < Math.abs(targetX - startX); i++) {
+            for (int i = 1; i < Math.abs(targetX - startX); ++i) {
                 int nextX = startX + i * stepX;
                 int nextY = startY + i * stepY;
 
                 if (board[nextX][nextY] != null) {
-                    return false; // There's a piece blocking the path
+                    return false;
                 }
             }
         }

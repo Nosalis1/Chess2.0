@@ -39,7 +39,7 @@ public class King extends ChessPiece {
         // Check for a regular one-square move
         if ((deltaX == 1 && deltaY == 0) || (deltaX == 0 && deltaY == 1) || (deltaX == 1 && deltaY == 1)) {
             // Check if the target square is empty or has an opponent's piece
-            return board[targetY][targetX] == null || board[targetY][targetX].isWhite() != isWhite();
+            return board[targetX][targetY] == null || board[targetX][targetY].isWhite() != isWhite();
         }
 
         // Check for castling (special move for the king)
