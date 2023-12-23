@@ -15,6 +15,8 @@ public record UserInput(int col, int row) implements EventHandler<MouseEvent> {
             for (BoardField field : fields)
                 field.reset();
 
+        if (!TurnManagement.isValidTurn()) return;
+
         if (selectedPiece == null) {
             selectedPiece = Game.instance.board.getPiece(row, col);
             if (selectedPiece != null) {

@@ -1,4 +1,4 @@
-module com.chess2 {
+module com.chess {
     requires javafx.controls;
     requires javafx.fxml;
     requires org.jetbrains.annotations;
@@ -7,5 +7,6 @@ module com.chess2 {
     opens com.chess2 to javafx.fxml;
     exports com.chess2;
     exports com.chess2.pieces;
-    exports com.chess2.ai;
+    exports com.chess2.players;
+    exports com.chess2.utility;
 }

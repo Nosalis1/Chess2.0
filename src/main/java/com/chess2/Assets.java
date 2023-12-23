@@ -24,7 +24,7 @@ public abstract class Assets {
     public static void initialize() {
         System.out.println("Loading assets...");
         tabCount++;
-        loadDirectory(new File("C:\\Users\\Aleksa\\Desktop\\CS202\\Chess2.0\\src\\main\\resources"));
+        loadDirectory(new File(Objects.requireNonNull(Game.class.getResource("/Assets/")).getPath()));
         tabCount = 0;
         System.out.println("All assets loaded!");
     }

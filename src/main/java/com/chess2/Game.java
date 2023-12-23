@@ -1,12 +1,9 @@
 package com.chess2;
 
-import com.chess2.ai.ABPruningAI;
-import com.chess2.ai.ChessAI;
 import com.chess2.pieces.*;
+import com.chess2.players.Player;
 import com.chess2.utility.ImmutableInt2;
 import com.chess2.utility.Move;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.Background;
@@ -34,33 +31,6 @@ public class Game {
     public final VBox stats = new VBox();
     private BoardField[][] fields;
     public final ChessBoard board = new ChessBoard();
-    protected final ChessAI chessAI = new ABPruningAI();
-
-    private static class TurnManagement {
-        private static boolean whiteTurn = true;
-
-        public static boolean isWhiteTurn() {
-            return whiteTurn;
-        }
-
-        public static void next() {
-            whiteTurn = !whiteTurn;
-            if (!whiteTurn) {
-                Game.instance.chessAI.handleMove();
-            }
-        }
-
-        private static final ObservableList<Move> moveHistory = FXCollections.observableArrayList();
-
-        public static ObservableList<Move> getMoveHistory() {
-            return moveHistory;
-        }
-
-        public static void add(final int row, final int col, final int targetRow, final int targetCol) {
-            moveHistory.add(new Move(new ImmutableInt2(row, col), new ImmutableInt2(targetRow, targetCol)));
-        }
-    }
-
     public void reset() {
         this.board.reset();
 
@@ -138,7 +108,7 @@ public class Game {
             // this.root.add(piece, targetCol, targetRow);
             this.onPieceMoved(piece, originalRow, originalCol, targetRow, targetCol);
 
-            TurnManagement.add(originalRow, originalCol, targetRow, targetCol);
+            TurnManagement.addMove(new ImmutableInt2(originalRow, originalCol), new ImmutableInt2(targetRow, targetCol));
             TurnManagement.next();
         } else {
             System.err.println("Move not valid!");
@@ -153,6 +123,11 @@ public class Game {
         if (target instanceof King king) {
             // TODO : Force stop game
             System.out.println("Game ended!");
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Game over!");
+            alert.showAndWait();
+            Player.shutdownThreadPool();
+            System.exit(0); // TODO : remove later
         }
         // Do something with this (play sound...)
     }
@@ -184,7 +159,7 @@ public class Game {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Game over!");
             alert.showAndWait();
-            ABPruningAI.shutdownThreadPool();
+            Player.shutdownThreadPool();
             System.exit(0); // TODO : remove later
         }
     }

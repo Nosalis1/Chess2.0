@@ -1,4 +1,4 @@
-package com.chess2.ai;
+package com.chess2.players;
 
 import com.chess2.ChessBoard;
 import com.chess2.Game;
@@ -8,19 +8,27 @@ import javafx.application.Platform;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-public class ABPruningAI implements ChessAI {
+public class AIPlayer extends Player {
+    public enum Difficulty {
+        EASY(2),
+        MEDIUM(3),
+        HARD(4);
+        private final int value;
 
-    private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
-    public static void shutdownThreadPool() {
-        threadPool.shutdown();
+        Difficulty(final int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
     }
-    private static final int MAX_DEPTH = 4;
+
+    public Difficulty difficulty = Difficulty.HARD;
 
     @Override
-    public void handleMove() {
+    public void play() {
         threadPool.submit(() -> {
             double begin = System.currentTimeMillis();
             Move move = getBestMove(Game.instance.board, false);
@@ -41,7 +49,7 @@ public class ABPruningAI implements ChessAI {
         for (Move move : getAllPossibleMoves(board, isWhite)) {
             ChessBoard copyBoard = board.deepCopy();
             copyBoard.executeMove(move);
-            int evaluation = alphaBetaPruning(copyBoard, MAX_DEPTH - 1, alpha, beta, !isWhite);
+            int evaluation = alphaBetaPruning(copyBoard, difficulty.value - 1, alpha, beta, !isWhite);
 
             if (isWhite && evaluation > alpha) {
                 alpha = evaluation;
