@@ -1,44 +1,54 @@
 package com.chess2.pieces;
 
-import com.chess2.Assets;
-import com.chess2.ChessMove;
+import com.chess2.utility.MutableInt2;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import static com.chess2.pieces.ChessPiece.PieceColor.BLACK;
+import static com.chess2.pieces.ChessPiece.PieceColor.WHITE;
 
 /**
  * Represents a king chess piece.
+ * The king moves one square in any direction and is a crucial piece for checkmate.
+ * Additionally, it may participate in a special move known as castling.
  */
 public class King extends ChessPiece {
 
     /**
-     * Constructs a king.
+     * Constructs a king with the specified color.
      *
-     * @param isWhite Indicates whether the king is white or black.
+     * @param color The color of the king.
      */
-    public King(final boolean isWhite) {
-        super(Assets.getImage(isWhite ? "w_king_png_shadow_256px" : "b_king_png_shadow_256px"), isWhite);
+    public King(final PieceColor color) {
+        super(color);
     }
 
     /**
-     * Checks if a move is valid for the king.
+     * Constructs a king with the specified color and position.
      *
-     * @param startX  The x-coordinate of the starting position.
-     * @param startY  The y-coordinate of the starting position.
+     * @param color    The color of the king.
+     * @param position The position of the king on the chessboard.
+     */
+    public King(final PieceColor color, final @NotNull MutableInt2 position) {
+        super(color, position);
+    }
+
+    /**
+     * Checks if a move from the start position to the target position is a valid king move.
+     * Kings can move one square in any direction and may also participate in castling.
+     *
+     * @param startX  The x-coordinate of the start position.
+     * @param startY  The y-coordinate of the start position.
      * @param targetX The x-coordinate of the target position.
      * @param targetY The y-coordinate of the target position.
-     * @param board   The chessboard represented as a 2D array of chess pieces.
-     * @return True if the move is valid, false otherwise.
+     * @param board   The current configuration of chess pieces on the chessboard.
+     * @return {@code true} if the move is a valid king move, {@code false} otherwise.
      */
     @Override
-    public boolean isValidMove(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
-        // King can move one square in any direction
-
+    public boolean isValidMove(int startX, int startY, int targetX, int targetY, @NotNull ChessPiece[][] board) {
         int deltaX = Math.abs(targetX - startX);
         int deltaY = Math.abs(targetY - startY);
 
-        // Check for a regular one-square move
         if ((deltaX == 1 && deltaY == 0) || (deltaX == 0 && deltaY == 1) || (deltaX == 1 && deltaY == 1)) {
-            // Check if the target square is empty or has an opponent's piece
             return board[targetX][targetY] == null || board[targetX][targetY].isWhite() != isWhite();
         }
 
@@ -51,23 +61,30 @@ public class King extends ChessPiece {
     /**
      * Gets the value of the king.
      *
-     * @return The numerical value of the piece.
+     * @return The value of the king.
      */
     @Override
     public int getValue() {
         return 100;
     }
 
-
     /**
-     * Creates a copy of the king.
+     * Creates a shallow copy of the king.
      *
-     * @return A new instance of the king with the same properties.
+     * @return A shallow copy of the king.
      */
     @Override
-    public ChessPiece copy() {
-        final King temp = new King(isWhite());
-        temp.position.set(this.position.row(), this.position.col());
-        return temp;
+    public ChessPiece shallowCopy() {
+        return new King(this.isWhite() ? WHITE : BLACK, this.getPosition());
+    }
+
+    /**
+     * Creates a deep copy of the king.
+     *
+     * @return A deep copy of the king.
+     */
+    @Override
+    public ChessPiece deepCopy() {
+        return new King(this.isWhite() ? WHITE : BLACK, (MutableInt2) this.getPosition().copy());
     }
 }

@@ -1,76 +1,81 @@
 package com.chess2.pieces;
 
-import com.chess2.Assets;
-import com.chess2.ChessMove;
+import com.chess2.utility.MutableInt2;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import static com.chess2.pieces.ChessPiece.PieceColor.BLACK;
+import static com.chess2.pieces.ChessPiece.PieceColor.WHITE;
 
 /**
  * Represents a rook chess piece.
+ * Rooks move horizontally or vertically along ranks and files on the chessboard.
  */
 public class Rook extends ChessPiece {
 
     /**
-     * Constructs a rook.
+     * Constructs a rook with the specified color.
      *
-     * @param isWhite Indicates whether the rook is white or black.
+     * @param color The color of the rook.
      */
-    public Rook(final boolean isWhite) {
-        super(Assets.getImage(isWhite ? "w_rook_png_shadow_256px" : "b_rook_png_shadow_256px"), isWhite);
+    public Rook(final PieceColor color) {
+        super(color);
     }
 
     /**
-     * Checks if a move is valid for the rook.
+     * Constructs a rook with the specified color and position.
      *
-     * @param startX  The x-coordinate of the starting position.
-     * @param startY  The y-coordinate of the starting position.
+     * @param color    The color of the rook.
+     * @param position The position of the rook on the chessboard.
+     */
+    public Rook(final PieceColor color, final @NotNull MutableInt2 position) {
+        super(color, position);
+    }
+
+    /**
+     * Checks if a move from the start position to the target position is a valid rook move.
+     *
+     * @param startX  The x-coordinate of the start position.
+     * @param startY  The y-coordinate of the start position.
      * @param targetX The x-coordinate of the target position.
      * @param targetY The y-coordinate of the target position.
-     * @param board   The chessboard represented as a 2D array of chess pieces.
-     * @return True if the move is valid, false otherwise.
+     * @param board   The current configuration of chess pieces on the chessboard.
+     * @return {@code true} if the move is a valid rook move, {@code false} otherwise.
      */
     @Override
-    public boolean isValidMove(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
-        // Rook can move horizontally or vertically
-
-        // Check if the move is horizontal or vertical
+    public boolean isValidMove(int startX, int startY, int targetX, int targetY, @NotNull ChessPiece[][] board) {
         if (!isHorizontalOrVerticalMove(startX, startY, targetX, targetY)) {
             return false;
         }
-
-        // Check if there are no pieces blocking the path
         if (!isPathClear(startX, startY, targetX, targetY, board)) {
             return false;
         }
-
-        // Check if the target square is empty or has an opponent's piece
         return board[targetX][targetY] == null || board[targetX][targetY].isWhite() != isWhite();
     }
 
     /**
-     * Checks if a move is horizontal or vertical.
+     * Checks if the move is along a horizontal or vertical path.
      *
-     * @param startX  The x-coordinate of the starting position.
-     * @param startY  The y-coordinate of the starting position.
+     * @param startX  The x-coordinate of the start position.
+     * @param startY  The y-coordinate of the start position.
      * @param targetX The x-coordinate of the target position.
      * @param targetY The y-coordinate of the target position.
-     * @return True if the move is horizontal or vertical, false otherwise.
+     * @return {@code true} if the move is along a horizontal or vertical path, {@code false} otherwise.
      */
     private boolean isHorizontalOrVerticalMove(int startX, int startY, int targetX, int targetY) {
         return startX == targetX || startY == targetY;
     }
 
     /**
-     * Checks if there are no pieces blocking the path.
+     * Checks if the path between the start and target positions is clear of obstructions.
      *
-     * @param startX  The x-coordinate of the starting position.
-     * @param startY  The y-coordinate of the starting position.
+     * @param startX  The x-coordinate of the start position.
+     * @param startY  The y-coordinate of the start position.
      * @param targetX The x-coordinate of the target position.
      * @param targetY The y-coordinate of the target position.
-     * @param board   The chessboard represented as a 2D array of chess pieces.
-     * @return True if the path is clear, false if there are pieces blocking the path.
+     * @param board   The current configuration of chess pieces on the chessboard.
+     * @return {@code true} if the path is clear, {@code false} otherwise.
      */
-    private boolean isPathClear(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
+    private boolean isPathClear(int startX, int startY, int targetX, int targetY, @NotNull ChessPiece[][] board) {
         int stepX = Integer.compare(targetX, startX);
         int stepY = Integer.compare(targetY, startY);
 
@@ -88,7 +93,7 @@ public class Rook extends ChessPiece {
     /**
      * Gets the value of the rook.
      *
-     * @return The numerical value of the piece.
+     * @return The value of the rook.
      */
     @Override
     public int getValue() {
@@ -96,14 +101,22 @@ public class Rook extends ChessPiece {
     }
 
     /**
-     * Creates a copy of the rook.
+     * Creates a shallow copy of the rook.
      *
-     * @return A new instance of the rook with the same properties.
+     * @return A shallow copy of the rook.
      */
     @Override
-    public ChessPiece copy() {
-        final Rook temp = new Rook(isWhite());
-        temp.position.set(this.position.row(), this.position.col());
-        return temp;
+    public ChessPiece shallowCopy() {
+        return new Rook(this.isWhite() ? WHITE : BLACK, this.getPosition());
+    }
+
+    /**
+     * Creates a deep copy of the rook.
+     *
+     * @return A deep copy of the rook.
+     */
+    @Override
+    public ChessPiece deepCopy() {
+        return new Rook(this.isWhite() ? WHITE : BLACK, (MutableInt2) this.getPosition().copy());
     }
 }

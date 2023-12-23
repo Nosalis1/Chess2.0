@@ -1,44 +1,52 @@
 package com.chess2.pieces;
 
-import com.chess2.Assets;
-import com.chess2.ChessMove;
+import com.chess2.utility.MutableInt2;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import static com.chess2.pieces.ChessPiece.PieceColor.BLACK;
+import static com.chess2.pieces.ChessPiece.PieceColor.WHITE;
 
 /**
  * Represents a bishop chess piece.
+ * A bishop moves diagonally on the chessboard and captures opponents in its path.
  */
 public class Bishop extends ChessPiece {
 
     /**
-     * Constructs a bishop.
+     * Constructs a bishop with the specified color.
      *
-     * @param isWhite Indicates whether the bishop is white or black.
+     * @param color The color of the bishop.
      */
-    public Bishop(final boolean isWhite) {
-        super(Assets.getImage(isWhite ? "w_bishop_png_shadow_256px" : "b_bishop_png_shadow_256px"), isWhite);
+    public Bishop(final PieceColor color) {
+        super(color);
     }
 
     /**
-     * Checks if a move is valid for the bishop.
+     * Constructs a bishop with the specified color and position.
      *
-     * @param startX  The x-coordinate of the starting position.
-     * @param startY  The y-coordinate of the starting position.
+     * @param color    The color of the bishop.
+     * @param position The position of the bishop on the chessboard.
+     */
+    public Bishop(final PieceColor color, final @NotNull MutableInt2 position) {
+        super(color, position);
+    }
+
+    /**
+     * Checks if a move from the start position to the target position is a valid bishop move.
+     *
+     * @param startX  The x-coordinate of the start position.
+     * @param startY  The y-coordinate of the start position.
      * @param targetX The x-coordinate of the target position.
      * @param targetY The y-coordinate of the target position.
-     * @param board   The chessboard represented as a 2D array of chess pieces.
-     * @return True if the move is valid, false otherwise.
+     * @param pieces  The current configuration of chess pieces on the chessboard.
+     * @return {@code true} if the move is a valid bishop move, {@code false} otherwise.
      */
     @Override
-    public boolean isValidMove(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
-        // Bishop can move diagonally any number of squares
-
+    public boolean isValidMove(int startX, int startY, int targetX, int targetY, @NotNull ChessPiece[][] pieces) {
         int deltaX = Math.abs(targetX - startX);
         int deltaY = Math.abs(targetY - startY);
 
-        // Check if the move is diagonal
         if (deltaX == deltaY) {
-            // Check if there are no pieces blocking the path
             int stepX = Integer.compare(targetX, startX);
             int stepY = Integer.compare(targetY, startY);
 
@@ -46,22 +54,19 @@ public class Bishop extends ChessPiece {
                 int nextX = startX + i * stepX;
                 int nextY = startY + i * stepY;
 
-                if (board[nextX][nextY] != null) {
-                    return false; // There's a piece blocking the path
+                if (pieces[nextX][nextY] != null) {
+                    return false;
                 }
             }
-
-            // Check if the target square is empty or has an opponent's piece
-            return board[targetX][targetY] == null || board[targetX][targetY].isWhite() != isWhite();
+            return pieces[targetX][targetY] == null || pieces[targetX][targetY].isWhite() != isWhite();
         }
-
         return false;
     }
 
     /**
      * Gets the value of the bishop.
      *
-     * @return The numerical value of the piece.
+     * @return The value of the bishop.
      */
     @Override
     public int getValue() {
@@ -69,14 +74,22 @@ public class Bishop extends ChessPiece {
     }
 
     /**
-     * Creates a copy of the bishop.
+     * Creates a shallow copy of the bishop.
      *
-     * @return A new instance of the bishop with the same properties.
+     * @return A shallow copy of the bishop.
      */
     @Override
-    public ChessPiece copy() {
-        final Bishop temp = new Bishop(isWhite());
-        temp.position.set(this.position.row(), this.position.col());
-        return temp;
+    public ChessPiece shallowCopy() {
+        return new Bishop(this.isWhite() ? WHITE : BLACK, this.getPosition());
+    }
+
+    /**
+     * Creates a deep copy of the bishop.
+     *
+     * @return A deep copy of the bishop.
+     */
+    @Override
+    public ChessPiece deepCopy() {
+        return new Bishop(this.isWhite() ? WHITE : BLACK, (MutableInt2) this.getPosition().copy());
     }
 }

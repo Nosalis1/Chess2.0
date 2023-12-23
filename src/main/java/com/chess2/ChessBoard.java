@@ -1,6 +1,8 @@
 package com.chess2;
 
 import com.chess2.pieces.*;
+import com.chess2.utility.Int2;
+import com.chess2.utility.Move;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,13 +15,18 @@ import java.util.List;
 public class ChessBoard {
     private ChessPiece[][] pieces;
 
-    public final ChessPiece[][] getPieces() {
+    public final @Nullable ChessPiece[][] getPieces() {
         return this.pieces;
     }
 
     @Contract(pure = true)
     public final @Nullable ChessPiece getPiece(final int row, final int col) {
         return inBounds(row, col) ? this.pieces[row][col] : null;
+    }
+
+    @Contract(pure = true)
+    public final @Nullable ChessPiece getPiece(final @NotNull Int2 at) {
+        return this.getPiece(at.getX(), at.getY());
     }
 
     public void setPiece(final ChessPiece piece, final int row, final int col) {
@@ -37,14 +44,18 @@ public class ChessBoard {
                     if (piece.isWhite()) this.whitePieces.add(piece);
                     else this.blackPieces.add(piece);
                 }
-                piece.setPosition(row, col);
+                piece.getPosition().set(row, col);
             }
             this.pieces[row][col] = piece;
         } else System.err.println("Position [" + row + "][" + col + "] not in board bounds!");
     }
 
+    public void setPiece(final ChessPiece piece, final Int2 pos) {
+        this.setPiece(piece, pos.getX(), pos.getY());
+    }
+
     public void setPiece(final @NotNull ChessPiece piece) {
-        this.setPiece(piece, piece.position.row(), piece.position.col());
+        this.setPiece(piece, piece.getPosition().getX(), piece.getPosition().getY());
     }
 
     public void removePiece(final int row, final int col) {
@@ -52,12 +63,12 @@ public class ChessBoard {
     }
 
     public void removePiece(final @NotNull ChessPiece piece) {
-        this.removePiece(piece.position.row(), piece.position.col());
+        this.removePiece(piece.getPosition().getX(), piece.getPosition().getY());
     }
 
     public void capturePiece(final @NotNull ChessPiece piece) {
-        piece.onCapture();
-        this.removePiece(piece.position.row(), piece.position.col());
+        // piece.onCapture();
+        this.removePiece(piece.getPosition().getX(), piece.getPosition().getY());
     }
 
     public void capturePiece(final int row, final int col) {
@@ -75,7 +86,7 @@ public class ChessBoard {
             for (int col = 0; col < App.CELL_COUNT; ++col) {
                 final ChessPiece piece = this.getPiece(row, col);
                 if (piece != null) {
-                    result[row][col] = piece.copy();
+                    result[row][col] = piece.deepCopy();
                 }
             }
         return result;
@@ -135,35 +146,35 @@ public class ChessBoard {
 
         // Setup pawns
         for (int col = 0; col < App.CELL_COUNT; ++col) {
-            this.pieces[App.CELL_COUNT - 2][col] = new Pawn(true);
-            this.pieces[1][col] = new Pawn(false);
+            this.pieces[App.CELL_COUNT - 2][col] = new Pawn(ChessPiece.PieceColor.WHITE);
+            this.pieces[1][col] = new Pawn(ChessPiece.PieceColor.BLACK);
         }
 
         // Setup rooks
-        this.pieces[App.CELL_COUNT - 1][0] = new Rook(true);
-        this.pieces[App.CELL_COUNT - 1][App.CELL_COUNT - 1] = new Rook(true);
-        this.pieces[0][0] = new Rook(false);
-        this.pieces[0][App.CELL_COUNT - 1] = new Rook(false);
+        this.pieces[App.CELL_COUNT - 1][0] = new Rook(ChessPiece.PieceColor.WHITE);
+        this.pieces[App.CELL_COUNT - 1][App.CELL_COUNT - 1] = new Rook(ChessPiece.PieceColor.WHITE);
+        this.pieces[0][0] = new Rook(ChessPiece.PieceColor.BLACK);
+        this.pieces[0][App.CELL_COUNT - 1] = new Rook(ChessPiece.PieceColor.BLACK);
 
         // Setup knights
-        this.pieces[App.CELL_COUNT - 1][1] = new Knight(true);
-        this.pieces[App.CELL_COUNT - 1][App.CELL_COUNT - 2] = new Knight(true);
-        this.pieces[0][1] = new Knight(false);
-        this.pieces[0][App.CELL_COUNT - 2] = new Knight(false);
+        this.pieces[App.CELL_COUNT - 1][1] = new Knight(ChessPiece.PieceColor.WHITE);
+        this.pieces[App.CELL_COUNT - 1][App.CELL_COUNT - 2] = new Knight(ChessPiece.PieceColor.WHITE);
+        this.pieces[0][1] = new Knight(ChessPiece.PieceColor.BLACK);
+        this.pieces[0][App.CELL_COUNT - 2] = new Knight(ChessPiece.PieceColor.BLACK);
 
         // Setup bishops
-        this.pieces[App.CELL_COUNT - 1][2] = new Bishop(true);
-        this.pieces[App.CELL_COUNT - 1][App.CELL_COUNT - 3] = new Bishop(true);
-        this.pieces[0][2] = new Bishop(false);
-        this.pieces[0][App.CELL_COUNT - 3] = new Bishop(false);
+        this.pieces[App.CELL_COUNT - 1][2] = new Bishop(ChessPiece.PieceColor.WHITE);
+        this.pieces[App.CELL_COUNT - 1][App.CELL_COUNT - 3] = new Bishop(ChessPiece.PieceColor.WHITE);
+        this.pieces[0][2] = new Bishop(ChessPiece.PieceColor.BLACK);
+        this.pieces[0][App.CELL_COUNT - 3] = new Bishop(ChessPiece.PieceColor.BLACK);
 
         // Setup queens
-        this.pieces[App.CELL_COUNT - 1][3] = new Queen(true);
-        this.pieces[0][3] = new Queen(false);
+        this.pieces[App.CELL_COUNT - 1][3] = new Queen(ChessPiece.PieceColor.WHITE);
+        this.pieces[0][3] = new Queen(ChessPiece.PieceColor.BLACK);
 
         // Setup kings
-        this.pieces[App.CELL_COUNT - 1][4] = new King(true);
-        this.pieces[0][4] = new King(false);
+        this.pieces[App.CELL_COUNT - 1][4] = new King(ChessPiece.PieceColor.WHITE);
+        this.pieces[0][4] = new King(ChessPiece.PieceColor.BLACK);
 
         this.forceUpdatePositions();
         this.updatePieces();
@@ -174,7 +185,7 @@ public class ChessBoard {
             for (int col = 0; col < App.CELL_COUNT; ++col) {
                 final ChessPiece piece = this.getPiece(row, col);
                 if (piece == null) continue;
-                piece.setPosition(row, col);
+                piece.getPosition().set(row, col);
             }
     }
 
@@ -216,9 +227,9 @@ public class ChessBoard {
 
         List<ChessPiece> opponentPieces = isWhite ? blackPieces : whitePieces;
         for (ChessPiece opponentPiece : opponentPieces) {
-            List<ChessMove> possibleMoves = opponentPiece.getValidMoves(this.getPieces());
-            for (ChessMove move : possibleMoves) {
-                if (move.getTo().equals(king.position)) {
+            List<Move> possibleMoves = opponentPiece.getValidMoves(this.getPieces());
+            for (Move move : possibleMoves) {
+                if (move.to().equals(king.getPosition())) {
                     // King is under attack
                     return true;
                 }
@@ -235,8 +246,8 @@ public class ChessBoard {
 
         List<ChessPiece> playerPieces = isWhite ? whitePieces : blackPieces;
         for (ChessPiece playerPiece : playerPieces) {
-            List<ChessMove> possibleMoves = playerPiece.getValidMoves(this.getPieces());
-            for (ChessMove move : possibleMoves) {
+            List<Move> possibleMoves = playerPiece.getValidMoves(this.getPieces());
+            for (Move move : possibleMoves) {
                 ChessBoard testBoard = this.deepCopy();
                 testBoard.executeMove(move);
                 if (!testBoard.isCheck(isWhite)) {
@@ -250,11 +261,11 @@ public class ChessBoard {
         return true;
     }
 
-    public void executeMove(final ChessMove move) {
-        ChessPiece piece = getPiece(move.getFrom().row(), move.getFrom().col());
+    public void executeMove(final @NotNull Move move) {
+        ChessPiece piece = getPiece(move.from().getX(), move.from().getY());
         assert piece != null;
-        setPiece(piece, move.getTo().row(), move.getTo().col());
-        removePiece(move.getFrom().row(), move.getFrom().col());
-        piece.setPosition(move.getTo().row(), move.getTo().col());
+        setPiece(piece, move.to().getX(), move.to().getY());
+        removePiece(move.from().getX(), move.from().getY());
+        piece.getPosition().set(move.to().getX(), move.to().getY());
     }
 }

@@ -1,76 +1,81 @@
 package com.chess2.pieces;
 
-import com.chess2.Assets;
-import com.chess2.ChessMove;
+import com.chess2.utility.MutableInt2;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import static com.chess2.pieces.ChessPiece.PieceColor.BLACK;
+import static com.chess2.pieces.ChessPiece.PieceColor.WHITE;
 
 /**
  * Represents a queen chess piece.
+ * Queens have combined movement rules of rooks and bishops, allowing them to move horizontally, vertically, and diagonally.
  */
 public class Queen extends ChessPiece {
 
     /**
-     * Constructs a queen.
+     * Constructs a queen with the specified color.
      *
-     * @param isWhite Indicates whether the queen is white or black.
+     * @param color The color of the queen.
      */
-    public Queen(final boolean isWhite) {
-        super(Assets.getImage(isWhite ? "w_queen_png_shadow_256px" : "b_queen_png_shadow_256px"), isWhite);
+    public Queen(final PieceColor color) {
+        super(color);
     }
 
     /**
-     * Checks if a move is valid for the queen.
+     * Constructs a queen with the specified color and position.
      *
-     * @param startX  The x-coordinate of the starting position.
-     * @param startY  The y-coordinate of the starting position.
+     * @param color    The color of the queen.
+     * @param position The position of the queen on the chessboard.
+     */
+    public Queen(final PieceColor color, final @NotNull MutableInt2 position) {
+        super(color, position);
+    }
+
+    /**
+     * Checks if a move from the start position to the target position is a valid queen move.
+     *
+     * @param startX  The x-coordinate of the start position.
+     * @param startY  The y-coordinate of the start position.
      * @param targetX The x-coordinate of the target position.
      * @param targetY The y-coordinate of the target position.
-     * @param board   The chessboard represented as a 2D array of chess pieces.
-     * @return True if the move is valid, false otherwise.
+     * @param board   The current configuration of chess pieces on the chessboard.
+     * @return {@code true} if the move is a valid queen move, {@code false} otherwise.
      */
     @Override
-    public boolean isValidMove(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
-        // Queen can move horizontally, vertically, or diagonally
-
-        // Check if the move is horizontal, vertical, or diagonal
+    public boolean isValidMove(int startX, int startY, int targetX, int targetY, @NotNull ChessPiece[][] board) {
         if (!isHorizontalVerticalOrDiagonal(startX, startY, targetX, targetY)) {
             return false;
         }
-
-        // Check if there are no pieces blocking the path
         if (!isPathClear(startX, startY, targetX, targetY, board)) {
             return false;
         }
-
-        // Check if the target square is empty or has an opponent's piece
         return board[targetX][targetY] == null || board[targetX][targetY].isWhite() != isWhite();
     }
 
     /**
-     * Checks if a move is horizontal, vertical, or diagonal.
+     * Checks if the move is along a horizontal, vertical, or diagonal path.
      *
-     * @param startX  The x-coordinate of the starting position.
-     * @param startY  The y-coordinate of the starting position.
+     * @param startX  The x-coordinate of the start position.
+     * @param startY  The y-coordinate of the start position.
      * @param targetX The x-coordinate of the target position.
      * @param targetY The y-coordinate of the target position.
-     * @return True if the move is horizontal, vertical, or diagonal, false otherwise.
+     * @return {@code true} if the move is along a horizontal, vertical, or diagonal path, {@code false} otherwise.
      */
     private boolean isHorizontalVerticalOrDiagonal(int startX, int startY, int targetX, int targetY) {
         return startX == targetX || startY == targetY || Math.abs(startX - targetX) == Math.abs(startY - targetY);
     }
 
     /**
-     * Checks if there are no pieces blocking the path.
+     * Checks if the path between the start and target positions is clear of obstructions.
      *
-     * @param startX  The x-coordinate of the starting position.
-     * @param startY  The y-coordinate of the starting position.
+     * @param startX  The x-coordinate of the start position.
+     * @param startY  The y-coordinate of the start position.
      * @param targetX The x-coordinate of the target position.
      * @param targetY The y-coordinate of the target position.
-     * @param board   The chessboard represented as a 2D array of chess pieces.
-     * @return True if the path is clear, false if there are pieces blocking the path.
+     * @param board   The current configuration of chess pieces on the chessboard.
+     * @return {@code true} if the path is clear, {@code false} otherwise.
      */
-    private boolean isPathClear(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
+    private boolean isPathClear(int startX, int startY, int targetX, int targetY, @NotNull ChessPiece[][] board) {
         if (startX == targetX || startY == targetY) {
             if (!isVerticalClear(startX, startY, targetX, targetY, board)) {
                 return false;
@@ -83,7 +88,18 @@ public class Queen extends ChessPiece {
         }
         return true;
     }
-    private boolean isVerticalClear(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
+
+    /**
+     * Checks if the vertical path between start and target positions is clear.
+     *
+     * @param startX  The x-coordinate of the start position.
+     * @param startY  The y-coordinate of the start position.
+     * @param targetX The x-coordinate of the target position.
+     * @param targetY The y-coordinate of the target position.
+     * @param board   The current configuration of chess pieces on the chessboard.
+     * @return {@code true} if the vertical path is clear, {@code false} otherwise.
+     */
+    private boolean isVerticalClear(int startX, int startY, int targetX, int targetY, @NotNull ChessPiece[][] board) {
         if (startY != targetY) {
             int step = Integer.compare(targetY, startY);
             for (int i = 1; i < Math.abs(startY - targetY); i++) {
@@ -96,7 +112,17 @@ public class Queen extends ChessPiece {
         return true; // Path is clear
     }
 
-    private boolean isHorizontalClear(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
+    /**
+     * Checks if the horizontal path between start and target positions is clear.
+     *
+     * @param startX  The x-coordinate of the start position.
+     * @param startY  The y-coordinate of the start position.
+     * @param targetX The x-coordinate of the target position.
+     * @param targetY The y-coordinate of the target position.
+     * @param board   The current configuration of chess pieces on the chessboard.
+     * @return {@code true} if the horizontal path is clear, {@code false} otherwise.
+     */
+    private boolean isHorizontalClear(int startX, int startY, int targetX, int targetY, @NotNull ChessPiece[][] board) {
         if (startX != targetX) {
             int step = Integer.compare(targetX, startX);
             for (int i = 1; i < Math.abs(startX - targetX); i++) {
@@ -109,7 +135,17 @@ public class Queen extends ChessPiece {
         return true; // Path is clear
     }
 
-    private boolean isDiagonalClear(int startX, int startY, int targetX, int targetY, ChessPiece[][] board) {
+    /**
+     * Checks if the diagonal path between start and target positions is clear.
+     *
+     * @param startX  The x-coordinate of the start position.
+     * @param startY  The y-coordinate of the start position.
+     * @param targetX The x-coordinate of the target position.
+     * @param targetY The y-coordinate of the target position.
+     * @param board   The current configuration of chess pieces on the chessboard.
+     * @return {@code true} if the diagonal path is clear, {@code false} otherwise.
+     */
+    private boolean isDiagonalClear(int startX, int startY, int targetX, int targetY, @NotNull ChessPiece[][] board) {
         if (Math.abs(startX - targetX) == Math.abs(startY - targetY)) {
             int stepX = Integer.compare(targetX, startX);
             int stepY = Integer.compare(targetY, startY);
@@ -124,11 +160,10 @@ public class Queen extends ChessPiece {
         return true; // Path is clear
     }
 
-
     /**
      * Gets the value of the queen.
      *
-     * @return The numerical value of the piece.
+     * @return The value of the queen.
      */
     @Override
     public int getValue() {
@@ -136,14 +171,22 @@ public class Queen extends ChessPiece {
     }
 
     /**
-     * Creates a copy of the queen.
+     * Creates a shallow copy of the queen.
      *
-     * @return A new instance of the queen with the same properties.
+     * @return A shallow copy of the queen.
      */
     @Override
-    public ChessPiece copy() {
-        final Queen temp = new Queen(isWhite());
-        temp.position.set(this.position.row(), this.position.col());
-        return temp;
+    public ChessPiece shallowCopy() {
+        return new Queen(this.isWhite() ? WHITE : BLACK, this.getPosition());
+    }
+
+    /**
+     * Creates a deep copy of the queen.
+     *
+     * @return A deep copy of the queen.
+     */
+    @Override
+    public ChessPiece deepCopy() {
+        return new Queen(this.isWhite() ? WHITE : BLACK, (MutableInt2) this.getPosition().copy());
     }
 }
