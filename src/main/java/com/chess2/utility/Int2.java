@@ -2,13 +2,15 @@ package com.chess2.utility;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * An abstract class representing a two-dimensional integer vector.
  * Subclasses can extend this class to represent specific types of two-dimensional vectors.
  */
-public abstract class Int2 {
+@SuppressWarnings("unused")
+public abstract class Int2 implements Serializable {
 
     /**
      * The x-coordinate of the vector.

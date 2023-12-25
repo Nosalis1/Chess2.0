@@ -1,5 +1,6 @@
 package com.chess2.players;
 
+import com.chess2.Console;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ExecutorService;
@@ -9,6 +10,7 @@ public abstract class Player {
     protected static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
     public static void shutdownThreadPool() {
+        Console.log(Console.INFO, "Shutting down Player thread pool!");
         threadPool.shutdown();
     }
 

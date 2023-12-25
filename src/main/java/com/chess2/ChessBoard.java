@@ -47,7 +47,7 @@ public class ChessBoard {
                 piece.getPosition().set(row, col);
             }
             this.pieces[row][col] = piece;
-        } else System.err.println("Position [" + row + "][" + col + "] not in board bounds!");
+        } else Console.log(Console.ERROR,"Position [" + row + "][" + col + "] not in board bounds!");
     }
 
     public void setPiece(final ChessPiece piece, final Int2 pos) {

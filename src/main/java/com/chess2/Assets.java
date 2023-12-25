@@ -14,28 +14,20 @@ public abstract class Assets {
         return images.get(name);
     }
 
-    private static int tabCount = 0;
-
-    private static void addTabs() {
-        for (int i = 0; i < tabCount; ++i)
-            System.out.print('\t');
-    }
 
     public static void initialize() {
-        System.out.println("Loading assets...");
-        tabCount++;
+        Console.log(Console.INFO, "Loading assets...");
+        double timestamp = System.currentTimeMillis();
         loadDirectory(new File(Objects.requireNonNull(Game.class.getResource("/Assets/")).getPath()));
-        tabCount = 0;
-        System.out.println("All assets loaded!");
+        Console.log(Console.INFO, "All assets loaded!");
+        Console.log(Console.INFO, "Loading exec time: " + (System.currentTimeMillis() - timestamp) + "ms");
     }
 
     private static void loadDirectory(final File directory) {
         if (!directory.exists()) return;
 
         if (directory.isDirectory()) {
-            addTabs();
-            System.out.println("Loading directory : " + directory.getName());
-            tabCount++;
+            Console.log(Console.INFO, "Loading directory: " + directory.getName());
             for (File entry : Objects.requireNonNull(directory.listFiles())) {
                 loadDirectory(entry);
             }
@@ -46,17 +38,13 @@ public abstract class Assets {
 
     private static void loadFile(final File file) {
         if (file.getName().endsWith(".png") || file.getName().endsWith(".jpg")) {
-            addTabs();
-            System.out.println("Loading file : " + file.getName());
-
+            Console.log(Console.INFO, "Loading file: " + file.getName());
             String name = file.getName().substring(0, file.getName().endsWith(".png") ? file.getName().indexOf(".png") : file.getName().indexOf(".jpg"));
             images.put(
                     name,
                     new Image(file.getAbsolutePath())
             );
-
-            addTabs();
-            System.out.println("Loaded " + name);
+            Console.log(Console.INFO, "File loaded: " + name);
         }
     }
 }

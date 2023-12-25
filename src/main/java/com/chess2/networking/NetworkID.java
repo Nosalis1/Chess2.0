@@ -16,7 +16,7 @@ public abstract class NetworkID {
         Random random = new Random();
         long id;
         do {
-            id = 1000 + random.nextLong() % (9999 - 1000 + 1);
+            id = 1000 + Math.abs(random.nextLong() % (9999 - 1000 + 1));
         } while (!allIds.add(id));
         return id;
     }

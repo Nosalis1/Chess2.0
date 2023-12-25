@@ -1,9 +1,6 @@
 package com.chess2.scenes;
 
-import com.chess2.App;
-import com.chess2.Assets;
-import com.chess2.Game;
-import com.chess2.TurnManagement;
+import com.chess2.*;
 import com.chess2.networking.Client;
 import com.chess2.players.Player;
 import javafx.collections.FXCollections;
@@ -17,7 +14,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 
 import static com.chess2.App.CELL_COUNT;
 import static com.chess2.App.CELL_SIZE;
@@ -37,6 +35,7 @@ public class MenuScene extends Scene {
     }
 
     ComboBox<Player.Type> typeComboBox;
+    Button playButton;
 
     private void setup() {
         StackPane root = (StackPane) super.getRoot();
@@ -55,10 +54,10 @@ public class MenuScene extends Scene {
                             new ComboBox<Player.Type>() {{
                                 typeComboBox = this;
                                 setItems(FXCollections.observableArrayList(Player.Type.values()));
-                                if (!Client.isConnected()) getItems().remove(Player.Type.ONLINE);
                                 setValue(Player.Type.AI);
                             }},
                             new Button("Play") {{
+                                playButton = this;
                                 setOnAction(actionEvent -> startGame(typeComboBox.getValue()));
                             }}
                     ) {{
@@ -74,23 +73,33 @@ public class MenuScene extends Scene {
         switch (type) {
             case AI -> startAIGame();
             case LOCAL -> startLocalGame();
-            case ONLINE -> startOnlineGame();
+            case ONLINE -> {
+                startOnlineGame();
+                return;
+            }
         }
         App.mainStage.setScene(GameScene.getInstance());
     }
 
     private void startLocalGame() {
-        TurnManagement.setupLocalPlayer(new Player.Data(true));
+        TurnManagement.setupLocalPlayer(Player.Type.LOCAL, new Player.Data(true));
         TurnManagement.setupRemotePlayer(Player.Type.LOCAL, new Player.Data(false));
     }
 
     private void startAIGame() {
-        TurnManagement.setupLocalPlayer(new Player.Data(true));
+        TurnManagement.setupLocalPlayer(Player.Type.LOCAL, new Player.Data(true));
         TurnManagement.setupRemotePlayer(Player.Type.AI, new Player.Data(false));
     }
 
     private void startOnlineGame() {
-        TurnManagement.setupLocalPlayer(new Player.Data(true));
-        TurnManagement.setupRemotePlayer(Player.Type.ONLINE, new Player.Data(false));
+        typeComboBox.setVisible(false);
+        playButton.setVisible(false);
+        try {
+            Client.getInstance().connect();
+        } catch (IOException e) {
+            Console.log(Console.ERROR, "Failed to connect to server!");
+            typeComboBox.setVisible(true);
+            playButton.setVisible(true);
+        }
     }
 }

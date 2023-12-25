@@ -10,14 +10,19 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("unused")
 public abstract class TurnManagement {
     private static Player localPlayer;
     private static Player remotePlayer;
 
-    public static void setupLocalPlayer(final @NotNull Player.Data data) {
-        localPlayer = new LocalPlayer() {{
+    public static void setupLocalPlayer(final Player.Type type, final @NotNull Player.Data data) {
+        localPlayer = type == Player.Type.AI ? new AIPlayer() {{
             setup(data);
-        }};
+        }} : (type == Player.Type.ONLINE ? new OnlinePlayer() {{
+            setup(data);
+        }} : new LocalPlayer() {{
+            setup(data);
+        }});
     }
 
     public static void setupRemotePlayer(final Player.Type type, final @NotNull Player.Data data) {

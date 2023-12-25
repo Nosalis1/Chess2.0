@@ -1,7 +1,10 @@
 package com.chess2;
 
+import com.chess2.networking.Client;
+import com.chess2.networking.packets.NetworkMove;
 import com.chess2.pieces.ChessPiece;
 import com.chess2.utility.Move;
+import com.chess2.utility.MutableInt2;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import java.util.List;
@@ -32,8 +35,14 @@ public record UserInput(int col, int row) implements EventHandler<MouseEvent> {
                 }
             }
         } else {
-            if (selectedPiece != Game.instance.board.getPiece(row, col))
+            if (selectedPiece != Game.instance.board.getPiece(row, col)) {
+                if (Client.isConnected()) {
+                    final NetworkMove networkMove = new NetworkMove();
+                    networkMove.setMove(new Move(selectedPiece.getPosition(), new MutableInt2(row, col)));
+                    Client.getInstance().send(networkMove);
+                }
                 Game.instance.makeMove(selectedPiece, row, col);
+            }
             selectedPiece = null;
         }
     }

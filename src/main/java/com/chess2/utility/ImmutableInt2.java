@@ -2,11 +2,14 @@ package com.chess2.utility;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
+
 /**
  * A class representing an immutable two-dimensional integer vector.
  * Instances of this class cannot be modified after creation.
  */
-public class ImmutableInt2 extends Int2 {
+@SuppressWarnings("unused")
+public class ImmutableInt2 extends Int2 implements Serializable {
 
     /**
      * Constructs an immutable vector initialized to (0, 0).

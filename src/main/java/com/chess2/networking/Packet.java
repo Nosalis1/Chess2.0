@@ -14,4 +14,5 @@ public class Packet implements Serializable {
     }
 
     private final long senderId;
+    public final long getSenderId(){return this.senderId;}
 }

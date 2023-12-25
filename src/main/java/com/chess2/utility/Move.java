@@ -4,9 +4,11 @@ import com.chess2.Game;
 import com.chess2.pieces.ChessPiece;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public record Move(Int2 from, Int2 to) {
+@SuppressWarnings("unused")
+public record Move(Int2 from, Int2 to) implements Serializable {
 
     /**
      * Checks if the move coordinates are within the specified range.

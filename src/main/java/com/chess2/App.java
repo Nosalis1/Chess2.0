@@ -14,7 +14,6 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        System.out.println("Connected: " + Client.isConnected());
         Assets.initialize();
 
         mainStage = stage;
@@ -29,6 +28,7 @@ public class App extends Application {
     @Override
     public void stop() throws Exception {
         Player.shutdownThreadPool();
+        if (Client.isConnected()) Client.getInstance().disconnect();
         super.stop();
     }
 

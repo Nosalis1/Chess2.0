@@ -31,6 +31,7 @@ public class Game {
     public final VBox stats = new VBox();
     private BoardField[][] fields;
     public final ChessBoard board = new ChessBoard();
+
     public void reset() {
         this.board.reset();
 
@@ -87,31 +88,31 @@ public class Game {
     }
 
     public void makeMove(final ChessPiece piece, final int targetRow, final int targetCol) {
-        if (piece == null || piece.isWhite() != TurnManagement.isWhiteTurn()) return;
+        if (piece == null || piece.isWhite() != TurnManagement.isWhiteTurn()) {
+            Console.log(Console.ERROR, "Move not valid!");
+            return;
+        }
 
         final int originalRow = piece.getPosition().getX(), originalCol = piece.getPosition().getY();
         if (piece.isValidMove(originalRow, originalCol, targetRow, targetCol, this.board.getPieces())) {
             this.board.removePiece(piece);
             this.fields[piece.getPosition().getX()][piece.getPosition().getY()].setPiece(null);
-            //this.root.getChildren().remove(piece);
 
             final ChessPiece target = this.board.getPiece(targetRow, targetCol);
             if (target != null) {
                 this.board.capturePiece(target);
                 this.fields[target.getPosition().getX()][target.getPosition().getY()].setPiece(null);
-                // this.root.getChildren().remove(target);
                 this.onPieceCaptured(piece, target);
             }
 
             this.board.setPiece(piece, targetRow, targetCol);
             this.fields[targetRow][targetCol].setPiece(piece);
-            // this.root.add(piece, targetCol, targetRow);
             this.onPieceMoved(piece, originalRow, originalCol, targetRow, targetCol);
 
             TurnManagement.addMove(new ImmutableInt2(originalRow, originalCol), new ImmutableInt2(targetRow, targetCol));
             TurnManagement.next();
         } else {
-            System.err.println("Move not valid!");
+            Console.log(Console.ERROR, "Move not valid!");
         }
     }
 
@@ -120,9 +121,9 @@ public class Game {
     }
 
     private void onPieceCaptured(final ChessPiece captor, final ChessPiece target) {
-        if (target instanceof King king) {
+        if (target instanceof King) {
             // TODO : Force stop game
-            System.out.println("Game ended!");
+            Console.log(Console.INFO,"Game ended!");
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Game over!");
             alert.showAndWait();
@@ -136,7 +137,7 @@ public class Game {
         // Do something with this (play sound...)
 
         if (this.board.isCheck(true)) {
-            System.out.println("White in check");
+            Console.log(Console.WARNING,"White in check!");
             final King king = this.board.getKing(true);
             if (king == null) return;
             this.fields[king.getPosition().getX()][king.getPosition().getY()].highlightAttack();
@@ -146,7 +147,7 @@ public class Game {
             this.fields[king.getPosition().getX()][king.getPosition().getY()].reset();
         }
         if (this.board.isCheck(false)) {
-            System.out.println("Black in check");
+            Console.log(Console.WARNING,"Black in check!");
             final King king = this.board.getKing(false);
             if (king == null) return;
             this.fields[king.getPosition().getX()][king.getPosition().getY()].highlightAttack();
@@ -156,6 +157,7 @@ public class Game {
             this.fields[king.getPosition().getX()][king.getPosition().getY()].reset();
         }
         if (isGameOver()) {
+            Console.log(Console.INFO,"Game ended!");
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Game over!");
             alert.showAndWait();
@@ -164,6 +166,7 @@ public class Game {
         }
     }
 
+    @SuppressWarnings("unused")
     private void onPieceMoved(final ChessPiece piece, final int fromRow, final int fromCol) {
         this.onPieceMoved(piece, fromRow, fromCol, piece.getPosition().getX(), piece.getPosition().getY());
     }

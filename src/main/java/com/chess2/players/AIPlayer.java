@@ -1,6 +1,7 @@
 package com.chess2.players;
 
 import com.chess2.ChessBoard;
+import com.chess2.Console;
 import com.chess2.Game;
 import com.chess2.pieces.ChessPiece;
 import com.chess2.utility.Move;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AIPlayer extends Player {
+    @SuppressWarnings("unused")
     public enum Difficulty {
         EASY(2),
         MEDIUM(3),
@@ -32,7 +34,7 @@ public class AIPlayer extends Player {
         threadPool.submit(() -> {
             double begin = System.currentTimeMillis();
             Move move = getBestMove(Game.instance.board, false);
-            System.out.println("AI timestamp : " + (System.currentTimeMillis() - begin) + "ms");
+            Console.log(Console.INFO, "AI timestamp : " + (System.currentTimeMillis() - begin) + "ms");
             Platform.runLater(() -> Game.instance.makeMove(
                     move.from().getX(), move.from().getY(),
                     move.to().getX(), move.to().getY()
