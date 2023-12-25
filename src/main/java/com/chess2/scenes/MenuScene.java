@@ -7,15 +7,15 @@ import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Pair;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.chess2.App.CELL_COUNT;
 import static com.chess2.App.CELL_SIZE;
@@ -91,11 +91,47 @@ public class MenuScene extends Scene {
         TurnManagement.setupRemotePlayer(Player.Type.AI, new Player.Data(false));
     }
 
+    private Pair<String, String> displayLoginDialog() {
+        Dialog<Pair<String, String>> loginDialog = new Dialog<>();
+        loginDialog.setTitle("Login");
+
+        VBox root = new VBox();
+        TextField usernameField = new TextField();
+        PasswordField passwordField = new PasswordField();
+        root.getChildren().addAll(
+                new Label("Username:"),
+                usernameField,
+                new Label("Password"),
+                passwordField
+        );
+        loginDialog.setResultConverter(buttonType -> {
+            if (buttonType.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+                return new Pair<>(usernameField.getText(), passwordField.getText());
+            }
+            return null;
+        });
+        loginDialog.getDialogPane().setContent(root);
+        loginDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        AtomicReference<Pair<String, String>> result = new AtomicReference<>();
+
+        loginDialog.showAndWait().ifPresent(result::set);
+        return result.get();
+    }
+
+    private boolean validateUser(final Pair<String, String> data) {
+        return data != null && (data.getKey() != null && !data.getKey().isBlank()) && (data.getValue() != null && !data.getValue().isBlank());
+    }
+
     private void startOnlineGame() {
         typeComboBox.setVisible(false);
         playButton.setVisible(false);
         try {
-            Client.getInstance().connect();
+            Pair<String, String> data = displayLoginDialog();
+            if (!validateUser(data)) {
+                Console.log(Console.ERROR, "User not valid!");
+                throw new IOException();
+            }
+            Client.getInstance().connect(data);
         } catch (IOException e) {
             Console.log(Console.ERROR, "Failed to connect to server!");
             typeComboBox.setVisible(true);

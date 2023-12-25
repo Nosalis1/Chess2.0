@@ -1,6 +1,8 @@
 package com.chess2.networking;
 
 import com.chess2.Console;
+import com.chess2.networking.packets.LoginStatus;
+import com.chess2.networking.packets.RequestLogin;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -92,6 +94,7 @@ public class Server extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        DataBase.connect();
         stage.setTitle("Server");
 
         BorderPane borderPane = new BorderPane();
@@ -244,8 +247,13 @@ public class Server extends Application {
         Console.log(Console.INFO, "New socket accepted");
 
         final long networkId = NetworkID.getId();
-        this.clients.put(networkId, new ServerClient(networkId, client));
+        final ServerClient serverClient = new ServerClient(networkId, client);
+        this.clients.put(networkId, serverClient);
         this.waiting.add(this.clients.get(networkId));
+
+        RequestLogin requestLogin = (RequestLogin) serverClient.receive();
+        if (requestLogin == null) throw new RuntimeException("Fatal");// TODO : Handle later
+        serverClient.send(new LoginStatus());
 
         Console.log(Console.INFO, "Client: [InetAdder:" + client.getInetAddress() + " , NetworkID:" + networkId + "]");
 

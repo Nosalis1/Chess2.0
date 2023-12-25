@@ -5,11 +5,14 @@ import com.chess2.Console;
 import com.chess2.Game;
 import com.chess2.TurnManagement;
 import com.chess2.networking.packets.ClientConnected;
+import com.chess2.networking.packets.LoginStatus;
 import com.chess2.networking.packets.NetworkMove;
+import com.chess2.networking.packets.RequestLogin;
 import com.chess2.players.Player;
 import com.chess2.scenes.GameScene;
 import com.chess2.utility.Move;
 import javafx.application.Platform;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -42,7 +45,7 @@ public class Client implements Runnable {
     public Client() {
     }
 
-    public void connect() throws IOException {
+    public void connect(final Pair<String, String> data) throws IOException {
         Console.log(Console.INFO, "Trying to connect to the server...");
         this.socket = new Socket(HOST, Server.PORT);
         if (this.socket.isClosed() || !this.socket.isConnected())
@@ -55,6 +58,14 @@ public class Client implements Runnable {
         this.input = new ObjectInputStream(this.socket.getInputStream());
         this.output = new ObjectOutputStream(this.socket.getOutputStream());
         Console.log(Console.INFO, "Streams initialized!");
+
+        RequestLogin packet = new RequestLogin();
+        packet.setData(data);
+        this.send(packet);
+
+        LoginStatus status = (LoginStatus) this.receive();
+        if (status == null) throw new IOException();
+
         Console.log(Console.INFO, "Starting listening thread!");
         new Thread(this).start();
         Console.log(Console.INFO, "Listening thread started!");
