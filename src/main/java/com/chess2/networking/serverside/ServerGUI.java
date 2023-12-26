@@ -9,9 +9,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -132,6 +134,8 @@ public class ServerGUI extends Application {
         VBox.setMargin(statusArea, new Insets(10));
 
         connectionsButton.setDisable(true);
+        connectionsButton.setBackground(Background.fill(Color.RED));
+        runningButton.setBackground(Background.fill(Color.RED));
         runningButton.setOnAction(actionEvent -> {
             try {
                 if (Server.isRunning()) Server.stop();
@@ -149,6 +153,7 @@ public class ServerGUI extends Application {
     protected void serverStarted() {
         Platform.runLater(() -> {
             this.runningButton.setText("Stop");
+            runningButton.setBackground(Background.fill(Color.GREEN));
             this.connectionsButton.setDisable(false);
             this.serverStatusLabel.setText("Server Status: Running");
         });
@@ -157,6 +162,7 @@ public class ServerGUI extends Application {
     protected void serverStopped() {
         Platform.runLater(() -> {
             this.runningButton.setText("Start");
+            runningButton.setBackground(Background.fill(Color.RED));
             this.connectionsButton.setDisable(true);
             this.serverStatusLabel.setText("Server Status: Stopped");
         });
@@ -165,6 +171,7 @@ public class ServerGUI extends Application {
     protected void serverOpened() {
         Platform.runLater(() -> {
             this.connectionsButton.setText("Close");
+            connectionsButton.setBackground(Background.fill(Color.GREEN));
             this.connectionsButton.requestLayout();
         });
     }
@@ -172,6 +179,7 @@ public class ServerGUI extends Application {
     protected void serverClosed() {
         Platform.runLater(() -> {
             this.connectionsButton.setText("Open");
+            connectionsButton.setBackground(Background.fill(Color.RED));
             this.connectionsButton.requestLayout();
         });
     }

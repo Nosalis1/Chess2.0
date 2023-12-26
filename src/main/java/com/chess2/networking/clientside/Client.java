@@ -9,6 +9,7 @@ import com.chess2.networking.packets.state.BeginGame;
 import com.chess2.networking.packets.state.EndGame;
 import com.chess2.networking.packets.status.ConnectRequest;
 import com.chess2.networking.packets.status.DisconnectRequest;
+import com.chess2.networking.packets.status.QueueRequest;
 import com.chess2.networking.serverside.Server;
 import com.chess2.players.Player;
 import com.chess2.scenes.GameScene;
@@ -19,6 +20,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -95,9 +98,20 @@ public class Client {
 
         ExecutorService threadPool = Executors.newFixedThreadPool(1);
         threadPool.submit(() -> {
-            while (true) {
-                if (handlePacket(tryReceive()))
-                    break;
+            try {
+                socket.setSoTimeout(1000);
+            } catch (SocketException e) {
+                throw new RuntimeException(e);
+            }
+            while (!socket.isClosed()) {
+                try {
+                    if (handlePacket(receive()))
+                        break;
+                } catch (SocketTimeoutException ex) {
+                    if (socket.isClosed()) break;
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
@@ -147,16 +161,27 @@ public class Client {
             final boolean localColor = beginGame.isLocalPlayerWhite();
             TurnManagement.setupLocalPlayer(Player.Type.LOCAL, localColor);
             TurnManagement.setupRemotePlayer(Player.Type.ONLINE, !localColor);
-            Platform.runLater(() -> {
-                GameScene.getInstance().updateStats();
-                App.mainStage.setScene(GameScene.getInstance());
-            });
+            Platform.runLater(GameScene::displayScene);
         } else if (packet instanceof EndGame) {
             Platform.runLater(() -> {
                 App.mainStage.setScene(MenuScene.getInstance());
             });
+        } else if (packet instanceof DisconnectRequest) {
+            try {
+                socket.close();
+                onDisconnectedFromServer();
+            } catch (IOException e) {
+                if (socket.isClosed()) Console.log(Console.WARNING, "Socket is already closed!");
+                else Console.log(Console.ERROR, "Failed to close socket!");
+                throw new RuntimeException(e);
+            }
+            return true;
         }
         return false;
+    }
+
+    public static void requestQueue() {
+        trySend(new QueueRequest());
     }
 
     private static void onConnectedToServer() {

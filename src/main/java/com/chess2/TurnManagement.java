@@ -1,5 +1,6 @@
 package com.chess2;
 
+import com.chess2.networking.clientside.Client;
 import com.chess2.players.AIPlayer;
 import com.chess2.players.Player;
 import com.chess2.players.RemotePlayer;
@@ -45,8 +46,10 @@ public abstract class TurnManagement {
     }
 
     public static boolean isValidTurn() {
-        if (remotePlayer instanceof RemotePlayer other) {
-            return true;
+        if (!Client.isConnected()) {
+            if (remotePlayer instanceof RemotePlayer other) {
+                return true;
+            }
         }
         return localPlayer.isWhite() == whiteTurn;
     }

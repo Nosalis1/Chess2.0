@@ -3,6 +3,7 @@ package com.chess2.networking.serverside;
 import com.chess2.Console;
 import com.chess2.networking.Packet;
 import com.chess2.networking.packets.status.DisconnectRequest;
+import com.chess2.networking.packets.status.QueueRequest;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -50,6 +51,7 @@ public class ClientHandler implements Runnable {
     public final int getDatabaseID() {
         return this.databaseID;
     }
+
     public void setDatabaseID(final int id) {
         this.databaseID = id;
     }
@@ -95,6 +97,7 @@ public class ClientHandler implements Runnable {
     }
 
     public void forceDisconnect() {
+        trySend(new DisconnectRequest());
         try {
             this.input.close();
             this.output.close();
@@ -116,6 +119,8 @@ public class ClientHandler implements Runnable {
         if (packet instanceof DisconnectRequest) {
             this.disconnect();
             return true;
+        } else if (packet instanceof QueueRequest) {
+            Server.addInQueue(this);
         }
         return false;
     }

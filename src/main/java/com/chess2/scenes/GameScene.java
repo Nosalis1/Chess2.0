@@ -8,6 +8,7 @@ import com.chess2.networking.clientside.Client;
 import com.chess2.networking.database.UserData;
 import com.chess2.utility.Move;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -31,6 +32,11 @@ public class GameScene extends Scene {
         return instance;
     }
 
+    public static void displayScene() {
+        Platform.runLater(() -> App.mainStage.setScene(instance));
+        instance.refresh();
+    }
+
     public GameScene(Parent parent) {
         super(parent, CELL_SIZE * (CELL_COUNT + 2),
                 CELL_SIZE * CELL_COUNT);
@@ -42,10 +48,16 @@ public class GameScene extends Scene {
         HBox root = (HBox) super.getRoot();
         if (root == null) return;
 
+        root.setStyle("-fx-background-color: #" + BoardField.FIELD_DARK_COLOR.toString().substring(2) + ";");
+
+        root.setAlignment(Pos.CENTER);
+
         setupStats();
 
         root.getChildren().addAll(Game.instance.root, this.stats);
     }
+
+    // TODO : UPDATE STATS UI
 
     private final VBox stats = new VBox();
 
@@ -131,5 +143,10 @@ public class GameScene extends Scene {
         bGamesWonLabel.setText("Games Won: 0");
         bGamesLostLabel.setText("Games Lost: 0");
         bPlaytimeLabel.setText("Playtime: 0h");
+    }
+
+    private void refresh() {
+        Game.instance.reset();
+        updateStats();
     }
 }

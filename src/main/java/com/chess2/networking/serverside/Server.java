@@ -274,11 +274,6 @@ public abstract class Server {
                 Console.log(Console.INFO, "New Client[" + networkID + "] registered!");
                 threadPool.submit(handler);
                 ServerGUI.getInstance().updateClientsConnectedCount(clients.size());
-
-                final Room room = findAvailableRoom();
-                room.setHandler(handler);
-
-                ServerGUI.getInstance().updateActiveRoomsCount(rooms.size());
             } else {
                 Console.log(Console.WARNING, "New Client[" + networkID + "] failed to register!");
                 NetworkID.freeId(networkID);
@@ -287,5 +282,16 @@ public abstract class Server {
             NetworkID.freeId(networkID);
             Console.log(Console.ERROR, "Failed to initialize ClientHandler!");
         }
+    }
+
+    protected static void addInQueue(final ClientHandler handler) {
+        if (handler.inRoom()) {
+            Console.log(Console.WARNING, "Can't add Client[" + handler.getNetworkID() + "] in queue.Client is already in queue!");
+            return;
+        }
+        final Room room = findAvailableRoom();
+        room.setHandler(handler);
+
+        ServerGUI.getInstance().updateActiveRoomsCount(rooms.size());
     }
 }

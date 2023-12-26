@@ -3,28 +3,28 @@ package com.chess2.scenes;
 import com.chess2.*;
 import com.chess2.networking.clientside.Client;
 import com.chess2.players.Player;
-import javafx.collections.FXCollections;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.util.Pair;
-
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.chess2.App.CELL_COUNT;
 import static com.chess2.App.CELL_SIZE;
 
 public class MenuScene extends Scene {
-    private static MenuScene instance = new MenuScene(new StackPane());
+    private static MenuScene instance = new MenuScene(new VBox());
 
     public static MenuScene getInstance() {
         return instance;
+    }
+
+    public static void displayScene() {
+        Platform.runLater(() -> App.mainStage.setScene(instance));
+        instance.refresh();
     }
 
     public MenuScene(Parent parent) {
@@ -34,108 +34,60 @@ public class MenuScene extends Scene {
         this.setup();
     }
 
-    ComboBox<Player.Type> typeComboBox;
-    Button playButton;
-
+    // TODO : User data
     private void setup() {
-        StackPane root = (StackPane) super.getRoot();
+        VBox root = (VBox) super.getRoot();
         if (root == null) return;
 
-        root.getChildren().add(new ImageView() {{
-            setImage(Assets.getImage("chessBackground"));
-            setFitWidth(CELL_SIZE * CELL_COUNT);
-            setFitHeight(CELL_SIZE * CELL_COUNT);
-        }});
+        root.setStyle("-fx-background-color: #" + BoardField.FIELD_DARK_COLOR.toString().substring(2) + "; -fx-padding: 20;");
 
-        root.getChildren().add(new BorderPane() {{
-            setCenter(
-                    new VBox(
-                            new Label("Chess 2.0"),
-                            new ComboBox<Player.Type>() {{
-                                typeComboBox = this;
-                                setItems(FXCollections.observableArrayList(Player.Type.values()));
-                                setValue(Player.Type.AI);
-                            }},
-                            new Button("Play") {{
-                                playButton = this;
-                                setOnAction(actionEvent -> startGame(typeComboBox.getValue()));
-                            }}
-                    ) {{
-                        setAlignment(Pos.CENTER);
-                        setSpacing(10);
-                    }}
-            );
-        }});
+        root.setAlignment(Pos.CENTER);
+        root.setSpacing(10);
+        root.setPadding(new Insets(20));
+
+        Button playLocalButton = new Button("Local Game");
+        Button playAIButton = new Button("AI Game");
+        Button playOnlineButton = new Button("Online Game");
+
+        playLocalButton.setStyle("-fx-background-color: #" + BoardField.FIELD_MOVE_DARK_COLOR.toString().substring(2) + "; -fx-text-fill: white;");
+        playAIButton.setStyle("-fx-background-color: #" + BoardField.FIELD_MOVE_LIGHT_COLOR.toString().substring(2) + "; -fx-text-fill: white;");
+        playOnlineButton.setStyle("-fx-background-color: #" + BoardField.FIELD_MOVE_DARK_COLOR.toString().substring(2) + "; -fx-text-fill: white;");
+
+        root.getChildren().addAll(
+                playLocalButton, playAIButton, playOnlineButton
+        );
+
+        playLocalButton.setOnAction(this::onPlayLocalButtonPressed);
+        playAIButton.setOnAction(this::onPlayAIButtonPressed);
+        playOnlineButton.setOnAction(this::onPlayOnlineButtonPressed);
     }
 
-    private void startGame(final Player.Type type) {
-        Game.instance.reset();
-        switch (type) {
-            case AI -> startAIGame();
-            case LOCAL -> startLocalGame();
-            case ONLINE -> {
-                startOnlineGame();
-                return;
-            }
-        }
-        App.mainStage.setScene(GameScene.getInstance());
-    }
-
-    private void startLocalGame() {
+    private void onPlayLocalButtonPressed(ActionEvent actionEvent) {
         TurnManagement.setupLocalPlayer(Player.Type.LOCAL, true);
         TurnManagement.setupRemotePlayer(Player.Type.LOCAL, false);
+        GameScene.displayScene();
     }
 
-    private void startAIGame() {
+    private void onPlayAIButtonPressed(ActionEvent actionEvent) {
         TurnManagement.setupLocalPlayer(Player.Type.LOCAL, true);
         TurnManagement.setupRemotePlayer(Player.Type.AI, false);
+        GameScene.displayScene();
     }
 
-    private Pair<String, String> displayLoginDialog() {
-        Dialog<Pair<String, String>> loginDialog = new Dialog<>();
-        loginDialog.setTitle("Login");
-
-        VBox root = new VBox();
-        TextField usernameField = new TextField();
-        PasswordField passwordField = new PasswordField();
-        root.getChildren().addAll(
-                new Label("Username:"),
-                usernameField,
-                new Label("Password"),
-                passwordField
-        );
-        loginDialog.setResultConverter(buttonType -> {
-            if (buttonType.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
-                return new Pair<>(usernameField.getText(), passwordField.getText());
-            }
-            return null;
-        });
-        loginDialog.getDialogPane().setContent(root);
-        loginDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        AtomicReference<Pair<String, String>> result = new AtomicReference<>();
-
-        loginDialog.showAndWait().ifPresent(result::set);
-        return result.get();
+    private void onPlayOnlineButtonPressed(ActionEvent actionEvent) {
+        Client.requestQueue();
+        VBox root = (VBox) super.getRoot();
+        if (root == null) return;
+        root.getChildren().get(0).setDisable(true);
+        root.getChildren().get(1).setDisable(true);
+        root.getChildren().get(2).setDisable(true);
     }
 
-    private boolean validateUser(final Pair<String, String> data) {
-        return data != null && (data.getKey() != null && !data.getKey().isBlank()) && (data.getValue() != null && !data.getValue().isBlank());
-    }
-
-    private void startOnlineGame() {
-        typeComboBox.setVisible(false);
-        playButton.setVisible(false);
-        try {
-            Pair<String, String> data = displayLoginDialog();
-            if (!validateUser(data)) {
-                Console.log(Console.ERROR, "User not valid!");
-                throw new IOException();
-            }
-            Client.connect(data.getKey(), data.getValue());
-        } catch (IOException e) {
-            Console.log(Console.ERROR, "Failed to connect to server!");
-            typeComboBox.setVisible(true);
-            playButton.setVisible(true);
-        }
+    private void refresh() {
+        VBox root = (VBox) super.getRoot();
+        if (root == null) return;
+        root.getChildren().get(0).setDisable(false);
+        root.getChildren().get(1).setDisable(false);
+        root.getChildren().get(2).setDisable(!Client.isConnected());
     }
 }
