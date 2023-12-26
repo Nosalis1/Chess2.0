@@ -18,11 +18,8 @@ public abstract class Player {
         LOCAL, AI, ONLINE
     }
 
-    public record Data(boolean white) {
-    }
-
-    public void setup(final @NotNull Data data) {
-        this.white = data.white;
+    public void setup(final boolean white) {
+        this.white = white;
     }
 
     private boolean white = true;

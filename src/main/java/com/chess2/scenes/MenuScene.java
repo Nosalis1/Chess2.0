@@ -1,7 +1,7 @@
 package com.chess2.scenes;
 
 import com.chess2.*;
-import com.chess2.networking.Client;
+import com.chess2.networking.clientside.Client;
 import com.chess2.players.Player;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
@@ -82,13 +82,13 @@ public class MenuScene extends Scene {
     }
 
     private void startLocalGame() {
-        TurnManagement.setupLocalPlayer(Player.Type.LOCAL, new Player.Data(true));
-        TurnManagement.setupRemotePlayer(Player.Type.LOCAL, new Player.Data(false));
+        TurnManagement.setupLocalPlayer(Player.Type.LOCAL, true);
+        TurnManagement.setupRemotePlayer(Player.Type.LOCAL, false);
     }
 
     private void startAIGame() {
-        TurnManagement.setupLocalPlayer(Player.Type.LOCAL, new Player.Data(true));
-        TurnManagement.setupRemotePlayer(Player.Type.AI, new Player.Data(false));
+        TurnManagement.setupLocalPlayer(Player.Type.LOCAL, true);
+        TurnManagement.setupRemotePlayer(Player.Type.AI, false);
     }
 
     private Pair<String, String> displayLoginDialog() {
@@ -131,7 +131,7 @@ public class MenuScene extends Scene {
                 Console.log(Console.ERROR, "User not valid!");
                 throw new IOException();
             }
-            Client.getInstance().connect(data);
+            Client.connect(data.getKey(), data.getValue());
         } catch (IOException e) {
             Console.log(Console.ERROR, "Failed to connect to server!");
             typeComboBox.setVisible(true);

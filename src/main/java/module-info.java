@@ -12,4 +12,6 @@ module com.chess {
     exports com.chess2.pieces;
     exports com.chess2.players;
     exports com.chess2.utility;
+    exports com.chess2.networking.serverside;
+    exports com.chess2.networking.database;
 }

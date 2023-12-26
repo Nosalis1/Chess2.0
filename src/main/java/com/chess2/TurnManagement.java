@@ -1,9 +1,8 @@
 package com.chess2;
 
 import com.chess2.players.AIPlayer;
-import com.chess2.players.LocalPlayer;
-import com.chess2.players.OnlinePlayer;
 import com.chess2.players.Player;
+import com.chess2.players.RemotePlayer;
 import com.chess2.utility.Int2;
 import com.chess2.utility.Move;
 import javafx.collections.FXCollections;
@@ -15,24 +14,20 @@ public abstract class TurnManagement {
     private static Player localPlayer;
     private static Player remotePlayer;
 
-    public static void setupLocalPlayer(final Player.Type type, final @NotNull Player.Data data) {
+    public static void setupLocalPlayer(final Player.Type type, final boolean white) {
         localPlayer = type == Player.Type.AI ? new AIPlayer() {{
-            setup(data);
-        }} : (type == Player.Type.ONLINE ? new OnlinePlayer() {{
-            setup(data);
-        }} : new LocalPlayer() {{
-            setup(data);
-        }});
+            setup(white);
+        }} : new RemotePlayer() {{
+            setup(white);
+        }};
     }
 
-    public static void setupRemotePlayer(final Player.Type type, final @NotNull Player.Data data) {
+    public static void setupRemotePlayer(final Player.Type type, final boolean white) {
         remotePlayer = type == Player.Type.AI ? new AIPlayer() {{
-            setup(data);
-        }} : (type == Player.Type.ONLINE ? new OnlinePlayer() {{
-            setup(data);
-        }} : new LocalPlayer() {{
-            setup(data);
-        }});
+            setup(white);
+        }} : new RemotePlayer() {{
+            setup(white);
+        }};
     }
 
     public static Player getLocalPlayer() {
@@ -50,7 +45,7 @@ public abstract class TurnManagement {
     }
 
     public static boolean isValidTurn() {
-        if (remotePlayer instanceof LocalPlayer other) {
+        if (remotePlayer instanceof RemotePlayer other) {
             return true;
         }
         return localPlayer.isWhite() == whiteTurn;
@@ -71,9 +66,10 @@ public abstract class TurnManagement {
         return moveHistory;
     }
 
-    public static void addMove(final @NotNull Int2 from,final @NotNull Int2 to) {
+    public static void addMove(final @NotNull Int2 from, final @NotNull Int2 to) {
         moveHistory.add(new Move(from, to));
     }
+
     public static void addMove(final @NotNull Move move) {
         moveHistory.add(move);
     }

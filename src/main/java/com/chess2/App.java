@@ -1,6 +1,6 @@
 package com.chess2;
 
-import com.chess2.networking.Client;
+import com.chess2.networking.clientside.Client;
 import com.chess2.players.Player;
 import com.chess2.scenes.MenuScene;
 import javafx.application.Application;
@@ -28,7 +28,7 @@ public class App extends Application {
     @Override
     public void stop() throws Exception {
         Player.shutdownThreadPool();
-        if (Client.isConnected()) Client.getInstance().disconnect();
+        if (Client.isConnected()) Client.disconnect();
         super.stop();
     }
 

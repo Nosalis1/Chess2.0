@@ -1,6 +1,6 @@
 package com.chess2;
 
-import com.chess2.networking.Client;
+import com.chess2.networking.clientside.Client;
 import com.chess2.networking.packets.NetworkMove;
 import com.chess2.pieces.ChessPiece;
 import com.chess2.utility.Move;
@@ -39,7 +39,7 @@ public record UserInput(int col, int row) implements EventHandler<MouseEvent> {
                 if (Client.isConnected()) {
                     final NetworkMove networkMove = new NetworkMove();
                     networkMove.setMove(new Move(selectedPiece.getPosition(), new MutableInt2(row, col)));
-                    Client.getInstance().send(networkMove);
+                    Client.trySend(networkMove);
                 }
                 Game.instance.makeMove(selectedPiece, row, col);
             }

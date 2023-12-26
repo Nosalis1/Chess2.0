@@ -28,7 +28,6 @@ public class Game {
     public static final Game instance = new Game();
 
     public final GridPane root = new GridPane();
-    public final VBox stats = new VBox();
     private BoardField[][] fields;
     public final ChessBoard board = new ChessBoard();
 
@@ -37,7 +36,6 @@ public class Game {
 
         this.root.getChildren().clear();
         this.createGrid();
-        this.createStats();
 
         for (ChessPiece piece : this.board.getAllPieces()) {
             this.fields[piece.getPosition().getX()][piece.getPosition().getY()].setPiece(piece);
@@ -54,33 +52,6 @@ public class Game {
                 this.fields[row][col] = field;
             }
         }
-    }
-
-    private void createStats() {
-        this.stats.setPrefWidth(App.CELL_SIZE * 2);
-        VBox a = new VBox();
-        a.setBackground(Background.fill(BoardField.FIELD_DARK_COLOR));
-        a.getChildren().addAll(
-                new Label("Black Player") {{
-                    setAlignment(Pos.CENTER);
-                    setTextAlignment(TextAlignment.CENTER);
-                    setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, 20));
-                }}
-        );
-
-        VBox b = new VBox();
-        b.setBackground(Background.fill(BoardField.FIELD_LIGHT_COLOR));
-        b.getChildren().addAll(
-                new Label("White Player") {{
-                    setAlignment(Pos.CENTER);
-                    setTextAlignment(TextAlignment.CENTER);
-                    setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, 20));
-                }}
-        );
-
-        this.stats.getChildren().addAll(a, b, new ListView<Move>() {{
-            setItems(TurnManagement.getMoveHistory());
-        }});
     }
 
     public final BoardField[][] getFields() {
