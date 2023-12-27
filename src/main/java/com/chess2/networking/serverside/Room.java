@@ -58,8 +58,8 @@ public class Room {
     public void start() {
         Random random = new Random();
         boolean value = random.nextBoolean();
-        this.handler1.trySend(new BeginGame(value, DatabaseService.instance.readData(this.handler2.getDatabaseID())));
-        this.handler2.trySend(new BeginGame(!value, DatabaseService.instance.readData(this.handler1.getDatabaseID())));
+        this.handler1.trySend(new BeginGame(value, DatabaseService.getUserDataById(this.handler2.getDatabaseID())));
+        this.handler2.trySend(new BeginGame(!value, DatabaseService.getUserDataById(this.handler1.getDatabaseID())));
     }
 
     public void stop() {

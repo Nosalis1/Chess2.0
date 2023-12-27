@@ -7,9 +7,10 @@ public class ConnectRequest extends Packet {
     public ConnectRequest() {
     }
 
-    public ConnectRequest(final String username, final String password) {
+    public ConnectRequest(final String username, final String password, final boolean register) {
         this.username = username;
         this.password = password;
+        this.register = register;
     }
 
     private String username, password;
@@ -20,6 +21,12 @@ public class ConnectRequest extends Packet {
 
     public final String getPassword() {
         return this.password;
+    }
+
+    private boolean register;
+
+    public final boolean isRegistering() {
+        return this.register;
     }
 
     private boolean valid = false;

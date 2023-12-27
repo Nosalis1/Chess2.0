@@ -89,10 +89,9 @@ public abstract class Server {
             return;
         }
 
-        try {
-            DatabaseService.instance.connect();
-        } catch (DatabaseServiceException e) {
-            Console.log(Console.ERROR, "Failed to connect to database!");
+        DatabaseService.connect();
+        if (!DatabaseService.isConnected()) {
+            Console.log(Console.ERROR, "Failed to start server!");
             return;
         }
 
@@ -168,6 +167,7 @@ public abstract class Server {
         Console.log(Console.INFO, "Terminating Executor Thread Pool!");
         threadPool.shutdownNow();
         Console.log(Console.INFO, "Thread Pool terminated!");
+        DatabaseService.disconnect();
         running = false;
         Console.log(Console.INFO, "Server stopped!");
         onServerStopped();
@@ -240,36 +240,7 @@ public abstract class Server {
         final long networkID = NetworkID.getId();
         try {
             final ClientHandler handler = new ClientHandler(networkID, socket);
-
-            boolean isValid = false;
-            try {
-                final int timeout = socket.getSoTimeout();
-                socket.setSoTimeout(1000);
-
-                ConnectRequest requestLogin = (ConnectRequest) handler.receive();
-                Console.log(Console.INFO, "Received Packet from Client[" + networkID + "]!");
-                if (requestLogin == null) {
-                    Console.log(Console.ERROR, "Client[" + networkID + "] didn't requested login!");
-                    handler.forceDisconnect();
-                    return;
-                }
-                Console.log(Console.INFO, "Validating login!");
-                final int id = DatabaseService.instance.validateLogin(new Pair<>(requestLogin.getUsername(), requestLogin.getPassword()));
-                isValid = id != -1 && !isClientAlreadyConnected(id);
-                if (isValid) requestLogin.setValid();
-                Console.log(Console.INFO, "Login validated[" + isValid + "]!");
-                handler.setDatabaseID(id);
-                requestLogin.setUserData(DatabaseService.instance.readData(id));
-                handler.trySend(requestLogin);
-                Console.log(Console.INFO, "Packet sent to Client[" + networkID + "]!");
-
-                socket.setSoTimeout(timeout);
-            } catch (SocketTimeoutException ex) {
-                Console.log(Console.WARNING, "Client[" + networkID + "] didn't requested login!");
-            } catch (SocketException | ClassNotFoundException ex) {
-                Console.log(Console.ERROR, "Client[" + networkID + "] failed to request login!");
-            }
-            if (isValid) {
+            if (handleUserValidation(handler)) {
                 clients.put(networkID, handler);
                 Console.log(Console.INFO, "New Client[" + networkID + "] registered!");
                 threadPool.submit(handler);
@@ -282,6 +253,51 @@ public abstract class Server {
             NetworkID.freeId(networkID);
             Console.log(Console.ERROR, "Failed to initialize ClientHandler!");
         }
+    }
+
+    private static boolean handleUserValidation(final ClientHandler handler) throws IOException {
+        final Socket socket = handler.getSocket();
+        final long networkID = handler.getNetworkID();
+        boolean isValid = false;
+        try {
+            final int timeout = socket.getSoTimeout();
+            socket.setSoTimeout(1000);
+
+            ConnectRequest request = (ConnectRequest) handler.receive();
+            Console.log(Console.INFO, "Received Packet from Client[" + networkID + "]!");
+            if (request == null) {
+                Console.log(Console.ERROR, "Client[" + networkID + "] didn't requested registration!");
+                handler.forceDisconnect();
+                return false;
+            }
+
+            int userID = DatabaseService.INVALID_USER;
+            if (request.isRegistering()) {
+                Console.log(Console.INFO, "Validating registration!");
+                if (DatabaseService.addUser(request.getUsername(), request.getPassword())) {
+                    isValid = true;
+                }
+            }
+            if (!isValid) {
+                Console.log(Console.INFO, "Validating login!");
+                userID = DatabaseService.validateLogin(request.getUsername(), request.getPassword());
+                isValid = userID != DatabaseService.INVALID_USER && !isClientAlreadyConnected(userID);
+            }
+            if (isValid) request.setValid();
+            Console.log(Console.INFO, "Login validated[" + isValid + "]!");
+            handler.setDatabaseID(userID);
+            request.setUserData(DatabaseService.getUserDataById(userID));
+
+            handler.trySend(request);
+            Console.log(Console.INFO, "Packet sent to Client[" + networkID + "]!");
+
+            socket.setSoTimeout(timeout);
+        } catch (SocketTimeoutException ex) {
+            Console.log(Console.WARNING, "Client[" + networkID + "] didn't requested login!");
+        } catch (SocketException | ClassNotFoundException ex) {
+            Console.log(Console.ERROR, "Client[" + networkID + "] failed to request login!");
+        }
+        return isValid;
     }
 
     protected static void addInQueue(final ClientHandler handler) {

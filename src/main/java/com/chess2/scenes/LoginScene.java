@@ -1,20 +1,20 @@
 package com.chess2.scenes;
 
 import com.chess2.App;
-import com.chess2.BoardField;
 import com.chess2.Console;
 import com.chess2.networking.clientside.Client;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import static com.chess2.App.CELL_COUNT;
 import static com.chess2.App.CELL_SIZE;
@@ -28,7 +28,6 @@ public class LoginScene extends Scene {
 
     public static void displayScene() {
         Platform.runLater(() -> App.mainStage.setScene(instance));
-        instance.refresh();
     }
 
     public LoginScene(Parent parent) {
@@ -42,39 +41,41 @@ public class LoginScene extends Scene {
         VBox root = (VBox) super.getRoot();
         if (root == null) return;
 
-        root.setStyle("-fx-background-color: #" + BoardField.FIELD_DARK_COLOR.toString().substring(2) + "; -fx-padding: 20;");
-
-        root.setAlignment(Pos.CENTER);
-        root.setSpacing(10);
-        root.setPadding(new Insets(20));
-
         Button loginButton = new Button("Login");
+        Button registerButton = new Button("Register");
         Button playOfflineButton = new Button("Play Offline");
 
         TextField usernameField = new TextField();
         PasswordField passwordField = new PasswordField();
 
-        usernameField.setStyle("-fx-max-width: 200;");
-        passwordField.setStyle("-fx-max-width: 200;");
-        loginButton.setStyle("-fx-background-color: #" + BoardField.FIELD_MOVE_DARK_COLOR.toString().substring(2) + "; -fx-text-fill: white;");
-        playOfflineButton.setStyle("-fx-background-color: #" + BoardField.FIELD_MOVE_LIGHT_COLOR.toString().substring(2) + "; -fx-text-fill: white;");
-
         Label usernameLabel = new Label("Username:");
         Label passwordLabel = new Label("Password");
 
-        usernameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: white;");
-        passwordLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: white;");
+        loginButton.setId("loginButton");
+        registerButton.setId("registerButton");
+        playOfflineButton.setId("playOfflineButton");
+
+        usernameField.setPromptText("Enter username");
+        passwordField.setPromptText("Enter password");
 
         root.getChildren().addAll(
                 usernameLabel,
                 usernameField,
                 passwordLabel,
                 passwordField,
-                loginButton,
+                new HBox(loginButton, registerButton) {{
+                    setAlignment(Pos.CENTER);
+                    setSpacing(10);
+                }},
                 playOfflineButton
         );
 
+        root.requestFocus();
+        final String cssFile = Objects.requireNonNull(getClass().getResource("/Styles/LoginSceneStyle.css")).toExternalForm();
+        root.getStylesheets().add(cssFile);
+
         loginButton.setOnAction(this::onLoginButtonPressed);
+        registerButton.setOnAction(this::onRegisterButtonPressed);
         playOfflineButton.setOnAction(this::onPlayOfflineButtonPressed);
     }
 
@@ -115,12 +116,24 @@ public class LoginScene extends Scene {
         if (Client.isConnected()) MenuScene.displayScene();
     }
 
-    private void onPlayOfflineButtonPressed(ActionEvent actionEvent) {
-        // TODO : Open Game
-        MenuScene.displayScene();
+    private void onRegisterButtonPressed(ActionEvent actionEvent) {
+        Pair<String, String> credentials = getCredentials();
+        if (credentials == null) return;
+
+        try {
+            Client.connect(credentials.getKey(), credentials.getValue(), true);
+        } catch (IOException e) {
+            Console.log(Console.ERROR, "Failed to connect to server!");
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Connection error");
+            alert.setContentText("Failed to connect to server!\n" + e.getMessage());
+            alert.showAndWait();
+        }
+
+        if (Client.isConnected()) MenuScene.displayScene();
     }
 
-    private void refresh() {
-
+    private void onPlayOfflineButtonPressed(ActionEvent actionEvent) {
+        MenuScene.displayScene();
     }
 }

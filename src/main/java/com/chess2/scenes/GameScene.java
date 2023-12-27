@@ -123,12 +123,12 @@ public class GameScene extends Scene {
                 aUsernameLabel.setText("Username: " + blackData.getUsername());
                 aGamesWonLabel.setText("Games Won: " + blackData.getGamesWon());
                 aGamesLostLabel.setText("Games Lost: " + blackData.getGamesLost());
-                aPlaytimeLabel.setText("Playtime: " + blackData.getPlaytime() + "h");
+                aPlaytimeLabel.setText("Playtime: " + blackData.getTotalPlaytime() + "h");
 
                 bUsernameLabel.setText("Username: " + whiteData.getUsername());
                 bGamesWonLabel.setText("Games Won: " + whiteData.getGamesWon());
                 bGamesLostLabel.setText("Games Lost: " + whiteData.getGamesLost());
-                bPlaytimeLabel.setText("Playtime: " + whiteData.getPlaytime() + "h");
+                bPlaytimeLabel.setText("Playtime: " + whiteData.getTotalPlaytime() + "h");
             } else resetStats();
         });
     }

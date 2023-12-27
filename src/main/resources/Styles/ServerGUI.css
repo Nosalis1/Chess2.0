@@ -1,0 +1,36 @@
+/* ServerGUI.css */
+
+.root {
+    -fx-background-color: #1E1E1E;
+}
+
+.server-status-label {
+    -fx-font-size: 18;
+    -fx-font-weight: bold;
+    -fx-text-fill: #66BB6A;
+}
+
+.client-count-label, .room-count-label {
+    -fx-font-size: 14;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+}
+
+.status-area {
+    -fx-control-inner-background: #212121;
+    -fx-text-fill: #B0BEC5;
+}
+
+.button {
+    -fx-font-weight: bold;
+    -fx-border-radius: 5;
+}
+
+.running-button, .connections-button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: #FFFFFF;
+}
+
+.running-button:hover, .connections-button:hover {
+    -fx-background-color: #2E7D32;
+}

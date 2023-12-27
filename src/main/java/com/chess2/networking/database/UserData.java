@@ -1,24 +1,37 @@
 package com.chess2.networking.database;
 
+import com.chess2.Console;
+import com.mysql.cj.exceptions.ClosedOnExpiredPasswordException;
+
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class UserData implements Serializable {
+    private int userId;
     private String username;
-    private Date dateCreated;
-    private transient int playtime;
+    private String dateCreated;
     private int gamesWon;
     private int gamesLost;
+    private transient long totalPlaytime;
 
-    public UserData() {
-    }
-
-    public UserData(String username, Date dateCreated, int gamesWon, int gamesLost) {
+    public UserData(int userId, String username, String dateCreated, int gamesWon, int gamesLost) {
+        this.userId = userId;
         this.username = username;
         this.dateCreated = dateCreated;
         this.gamesWon = gamesWon;
         this.gamesLost = gamesLost;
-        calculatePlaytime();
+
+        this.totalPlaytime = calculateTotalPlaytime();
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getUsername() {
@@ -29,13 +42,12 @@ public class UserData implements Serializable {
         this.username = username;
     }
 
-    public Date getDateCreated() {
+    public String getDateCreated() {
         return dateCreated;
     }
 
-    public void setDateCreated(Date dateCreated) {
+    public void setDateCreated(String dateCreated) {
         this.dateCreated = dateCreated;
-        calculatePlaytime();
     }
 
     public int getGamesWon() {
@@ -54,24 +66,25 @@ public class UserData implements Serializable {
         this.gamesLost = gamesLost;
     }
 
-    private void calculatePlaytime() {
-        Date today = new Date();
-        long diffMillis = today.getTime() - dateCreated.getTime();
-        playtime = (int) (diffMillis / (60 * 60 * 1000));
+    public long getTotalPlaytime() {
+        calculateTotalPlaytime();
+        return totalPlaytime;
     }
 
-    public final int getPlaytime(){
-        calculatePlaytime();
-        return this.playtime;
+    public void setTotalPlaytime(long totalPlaytime) {
+        this.totalPlaytime = totalPlaytime;
     }
 
-    @Override
-    public String toString() {
-        return "UserData{" +
-                "dateCreated=" + dateCreated +
-                ", playtime=" + playtime +
-                ", gamesWon=" + gamesWon +
-                ", gamesLost=" + gamesLost +
-                '}';
+    private long calculateTotalPlaytime() {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date createdDate = dateFormat.parse(dateCreated);
+            Date currentDate = new Date();
+
+            return currentDate.getTime() - createdDate.getTime();
+        } catch (ParseException e) {
+            Console.log(Console.ERROR, "Error parsing Date!");
+            return 0;
+        }
     }
 }

@@ -62,6 +62,10 @@ public class Client {
     }
 
     public static void connect(final String username, final String password) throws IOException {
+        connect(username, password, false);
+    }
+
+    public static void connect(final String username, final String password, final boolean register) throws IOException {
         if (isConnected()) {
             Console.log(Console.WARNING, "Can't connect to Server.Client is already connected!");
             return;
@@ -81,7 +85,7 @@ public class Client {
         output = new ObjectOutputStream(socket.getOutputStream());
         Console.log(Console.INFO, "Streams initialized!");
 
-        ConnectRequest connectRequest = new ConnectRequest(username, password);
+        ConnectRequest connectRequest = new ConnectRequest(username, password, register);
         trySend(connectRequest);
 
         connectRequest = (ConnectRequest) tryReceive();
@@ -93,6 +97,7 @@ public class Client {
             throw new IOException("Failed to register!");
         }
         setupLocalUser(connectRequest.getUserData());
+
         Console.log(Console.INFO, "Registered!");
         onConnectedToServer();
 

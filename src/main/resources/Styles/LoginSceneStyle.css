@@ -1,0 +1,54 @@
+/* LoginSceneStyle.css */
+
+.root {
+    -fx-background-color: #2F4F4F;
+    -fx-padding: 20;
+    -fx-alignment: center;
+    -fx-spacing: 10;
+}
+
+.vbox {
+    -fx-alignment: center;
+    -fx-spacing: 10;
+}
+
+.button {
+    -fx-font-size: 14;
+    -fx-min-width: 80;
+    -fx-background-radius: 5;
+    -fx-padding: 10 20;
+}
+
+#loginButton {
+    -fx-background-color: #006400;
+    -fx-text-fill: white;
+}
+
+#registerButton {
+    -fx-background-color: #006400;
+    -fx-text-fill: white;
+}
+
+#playOfflineButton {
+    -fx-background-color: #8B4513;
+    -fx-text-fill: white;
+}
+
+#loginButton:hover, #registerButton:hover {
+    -fx-background-color: derive(#006400, 20%);
+}
+#playOfflineButton:hover {
+    -fx-background-color: derive(#8B4513, 20%);
+}
+
+.text-field {
+    -fx-alignment: center;
+    -fx-max-width: 200;
+    -fx-font-size: 14;
+}
+
+.label {
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-font-size: 14;
+}

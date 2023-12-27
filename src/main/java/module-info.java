@@ -4,6 +4,7 @@ module com.chess {
     requires org.jetbrains.annotations;
     requires java.sql;
     requires mysql.connector.j;
+    requires jbcrypt;
 
 
     opens com.chess2 to javafx.fxml;
