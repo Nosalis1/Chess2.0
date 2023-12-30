@@ -4,6 +4,9 @@ import com.chess2.Console;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class DatabaseService {
     private static final String URL = "jdbc:mysql://localhost/chess2.0";
@@ -225,7 +228,8 @@ public abstract class DatabaseService {
                 if (resultSet.next()) {
                     int storedUserId = resultSet.getInt("userID");
                     String username = resultSet.getString("username");
-                    String dateCreated = resultSet.getString("date_created");
+                    LocalDateTime localDateTime = resultSet.getObject("date_created", LocalDateTime.class);
+                    String dateCreated = localDateTime.toString();
                     int gamesWon = resultSet.getInt("games_won");
                     int gamesLost = resultSet.getInt("games_lost");
 
@@ -239,5 +243,42 @@ public abstract class DatabaseService {
             Console.log(Console.ERROR, "Error retrieving user data: " + e.getMessage());
             return null;
         }
+    }
+
+    public static List<GameData> getGameDataByUserId(int userId) {
+        if (!isConnected()) {
+            Console.log(Console.WARNING, "Can't retrieve game data. Not connected to the database!");
+            return null;
+        }
+
+        if (userId == INVALID_USER)
+            return null;
+
+        String query = "SELECT u.username AS user1_username, u2.username AS user2_username, game.winnerID, game.date_started\n" +
+                "FROM game \n" +
+                "LEFT JOIN User u ON u.userID = game.user1ID\n" +
+                "LEFT JOIN User u2 ON u2.userID = game.user2ID\n" +
+                "WHERE game.user1ID = 1 OR game.user2ID = 1;\n";
+
+        List<GameData> data = new ArrayList<>();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, userId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    String username = "";
+                    boolean loss = false;
+                    String startTime = "";
+                    data.add(new GameData(username, loss, startTime));
+                } else {
+                    Console.log(Console.WARNING, "User not found with ID: " + userId);
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            Console.log(Console.WARNING, "Error retrieving game data: " + e.getMessage());
+            return null;
+        }
+        return data;
     }
 }

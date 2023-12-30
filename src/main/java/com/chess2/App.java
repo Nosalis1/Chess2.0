@@ -2,6 +2,7 @@ package com.chess2;
 
 import com.chess2.networking.clientside.Client;
 import com.chess2.players.Player;
+import com.chess2.scenes.GameScene;
 import com.chess2.scenes.LoginScene;
 import com.chess2.scenes.MenuScene;
 import javafx.application.Application;

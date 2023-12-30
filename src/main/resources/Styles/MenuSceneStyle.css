@@ -1,0 +1,79 @@
+/* MenuSceneStyle.css */
+
+.root {
+    -fx-background-color: #2F4F4F;
+    -fx-padding: 20;
+    -fx-alignment: center;
+    -fx-spacing: 10;
+}
+
+.buttons {
+    -fx-alignment: center;
+    -fx-spacing: 10;
+}
+
+.user {
+     -fx-alignment: center;
+     -fx-spacing: 10;
+}
+
+.label {
+     -fx-font-weight: bold;
+     -fx-text-fill: white;
+     -fx-font-size: 14;
+}
+
+.text-field {
+    -fx-alignment: center;
+    -fx-text-fill: white;
+    -fx-max-width: 200;
+    -fx-font-size: 14;
+    -fx-border-width: 2;
+    -fx-border-color: transparent transparent #ffffff transparent;
+    -fx-background-color: transparent;
+}
+
+.button {
+    -fx-background-color: #006400;
+    -fx-text-fill: white;
+    -fx-font-size: 14;
+    -fx-min-width: 80;
+    -fx-background-radius: 5;
+    -fx-padding: 10 20;
+}
+
+.button:hover {
+    -fx-background-color: derive(#006400, 20%);
+}
+
+#gameHistory {
+    -fx-background-color: #333333; /* Set the background color */
+}
+
+.table-view {
+    -fx-table-cell-border-color: #ffffff; /* Set the border color for cells */
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #006400; /* Set the background color for column headers */
+}
+
+.table-view .column-header {
+    -fx-text-fill: white; /* Set the text color for column headers */
+}
+
+.table-row-cell {
+    -fx-background-color: #555555; /* Set the background color for table rows */
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #444444; /* Set the background color for odd rows */
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #666666; /* Set the background color for hovered rows */
+}
+
+.table-cell {
+    -fx-text-fill: white; /* Set the text color for table cells */
+}
